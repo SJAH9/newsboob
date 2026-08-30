@@ -5,12 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>NEWSBOOB — world news tuner</title>
   <meta name="description" content="A standalone news stream viewer. One player, one dial. No account, no extra ads." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.23/dist/hls.min.js"></script>
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <link rel="canonical" href="https://sidhubbard.com/newsboob/" />
+  <script>
+    (() => {
+      let mode = "auto";
+      try {
+        const stored = localStorage.getItem("sid-theme-mode");
+        if (["auto", "light", "dark"].includes(stored)) mode = stored;
+      } catch {}
+      const hour = new Date().getHours();
+      document.documentElement.dataset.theme = mode === "auto"
+        ? (hour >= 7 && hour < 19 ? "light" : "dark")
+        : mode;
+      document.documentElement.dataset.themeMode = mode;
+    })();
+  </script>
+  <script src="hls.min.js"></script>
   <style>
-    :root {
+    .desk, .carto {
       --bg: #050608;
       --panel: #08090c;
       --line: #1c2430;
@@ -19,45 +32,150 @@
       --cyan: #3dffd2;
       --mag: #ff2d95;
       --screen: #000;
-      --font: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+      --font: ui-monospace, Menlo, Consolas, monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      width: 100%;
-    }
-    body {
+    .desk, .desk * { box-sizing: border-box; }
+    .desk * { margin: 0; padding: 0; }
+    html { height: 100%; }
+    body.newsboob-page {
       height: 100dvh;
       width: 100%;
-      color: var(--text);
-      font-family: var(--font);
-      font-size: clamp(11px, 1.05vw + 0.35vh, 14px);
-      background:
-        linear-gradient(rgba(61,255,210,.03) 1px, transparent 1px) 0 0 / 4vmin 4vmin,
-        linear-gradient(90deg, rgba(61,255,210,.03) 1px, transparent 1px) 0 0 / 4vmin 4vmin,
-        var(--bg);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      background: #050608;
+      color: #c8d0d8;
+    }
+    body.newsboob-page p:not(.eyebrow) {
+      color: inherit;
+      font-size: inherit;
+      margin-top: 0;
+      max-width: none;
+    }
+
+    .carto {
+      position: fixed;
+      inset: -30%;
+      top: -30%;
+      z-index: 0;
+      pointer-events: none;
+      background-color: var(--bg);
+      background-image:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent calc(3.2vmin - 1px),
+          rgba(61,255,210,.07) calc(3.2vmin - 1px),
+          rgba(61,255,210,.07) 3.2vmin
+        ),
+        repeating-linear-gradient(
+          to right,
+          transparent 0,
+          transparent calc(4.8vmin - 1px),
+          rgba(61,255,210,.06) calc(4.8vmin - 1px),
+          rgba(61,255,210,.06) 4.8vmin
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent calc(16vmin - 1px),
+          rgba(61,255,210,.16) calc(16vmin - 1px),
+          rgba(61,255,210,.16) 16vmin
+        ),
+        repeating-linear-gradient(
+          to right,
+          transparent 0,
+          transparent calc(24vmin - 1px),
+          rgba(61,255,210,.14) calc(24vmin - 1px),
+          rgba(61,255,210,.14) 24vmin
+        );
+      animation: carto-drift 80s linear infinite;
+    }
+    .carto::before,
+    .carto::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .carto::before {
+      background:
+        linear-gradient(to bottom, transparent 49.85%, rgba(255,45,149,.22) 49.85%, rgba(255,45,149,.22) 50.15%, transparent 50.15%),
+        linear-gradient(to right, transparent 49.9%, rgba(61,255,210,.2) 49.9%, rgba(61,255,210,.2) 50.1%, transparent 50.1%);
+      animation: carto-drift-2 120s linear infinite reverse;
+    }
+    .carto::after {
+      background-image:
+        repeating-linear-gradient(
+          to right,
+          rgba(61,255,210,.12) 0 1px,
+          transparent 1px 1.2vmin,
+          transparent 1.2vmin 4.8vmin
+        );
+      background-size: 4.8vmin 0.7vmin;
+      background-repeat: repeat-x;
+      background-position: 0 50%;
+      opacity: .45;
+      animation: carto-drift 80s linear infinite;
+    }
+    @keyframes carto-drift {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(-4.8vmin, -3.2vmin, 0); }
+    }
+    @keyframes carto-drift-2 {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(4.8vmin, 3.2vmin, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .carto, .carto::before, .carto::after { animation: none; }
     }
 
     .desk {
-      height: 100%;
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      min-height: 0;
       width: 100%;
       display: flex;
-      padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+      color: var(--text);
+      font-family: var(--font);
+      font-size: clamp(11px, 1.05vw + 0.35vh, 14px);
+      padding: 8px 8px 4px;
+    }
+    body.newsboob-page .site-footer {
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 20;
+      margin-top: 0;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    body.newsboob-page .persistent-audio-player,
+    body.newsboob-page.has-persistent-audio-player .persistent-audio-player {
+      display: none !important;
+    }
+    body.newsboob-page.has-persistent-audio-player {
+      padding-bottom: 0 !important;
+    }
+    body.newsboob-page .nav-links {
+      overflow: visible;
     }
 
     .set {
-      --dial: clamp(140px, 28vmin, 300px);
+      --dial: clamp(120px, 22vmin, 240px);
       width: 100%;
       height: 100%;
       min-height: 0;
-      background: var(--panel);
+      background: rgba(8, 9, 12, .72);
       border: 1px solid var(--line);
       padding: clamp(8px, 1.2vw, 16px);
       display: flex;
       flex-direction: column;
       gap: clamp(8px, 1vw, 14px);
+      overflow: hidden;
     }
 
     .set:fullscreen,
@@ -92,6 +210,13 @@
       font-style: normal;
       color: var(--text);
     }
+    .wordmark .chan {
+      font-style: normal;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: .14em;
+    }
+    .wordmark .chan:empty { display: none; }
 
     .model {
       font-size: clamp(9px, 0.9vw, 11px);
@@ -119,11 +244,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      gap: clamp(6px, 1vh, 12px);
-      overflow: auto;
+      gap: clamp(4px, 0.8vh, 10px);
+      overflow: hidden;
     }
 
     .dial-wrap {
+      display: none;
       width: var(--dial);
       height: var(--dial);
       flex: 0 0 auto;
@@ -147,7 +273,7 @@
       position: absolute;
       inset: 8%;
       border-radius: 50%;
-      background: #06070a;
+      background: rgba(6, 7, 10, .62);
       border: 1px solid #151b24;
     }
 
@@ -193,6 +319,21 @@
     }
     .hub::after { display: none; }
 
+    .clock {
+      position: absolute;
+      left: 50%;
+      top: 72%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      pointer-events: none;
+      font-size: clamp(11px, var(--dial) * 0.088, 17px);
+      font-weight: 500;
+      letter-spacing: .16em;
+      font-variant-numeric: tabular-nums;
+      color: var(--cyan);
+      text-shadow: 0 0 8px rgba(61,255,210,.4);
+    }
+
     .tick {
       position: absolute;
       left: 50%;
@@ -233,6 +374,7 @@
       width: 100%;
       max-width: calc(var(--dial) + 24px);
       border: 1px solid var(--line);
+      background: rgba(8, 9, 12, .45);
       padding: clamp(6px, 0.9vh, 10px) clamp(8px, 1vw, 12px);
       flex: 0 0 auto;
     }
@@ -295,6 +437,7 @@
 
     .tv {
       border: 1px solid var(--line);
+      background: rgba(8, 9, 12, .35);
       padding: clamp(4px, 0.7vw, 8px);
       display: flex;
       flex-direction: column;
@@ -317,10 +460,12 @@
       display: none;
       width: 100%;
       max-width: calc(var(--dial) + 24px);
-      flex: 0 0 auto;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: repeat(3, auto);
-      gap: clamp(4px, 0.6vw, 6px);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: clamp(3px, 0.5vw, 6px);
     }
     .previews.on { display: grid; }
     .preview {
@@ -328,30 +473,36 @@
       -webkit-appearance: none;
       position: relative;
       width: 100%;
+      height: 100%;
+      min-height: 0;
       padding: 0;
       font: inherit;
       color: inherit;
-      aspect-ratio: 16 / 9;
-      border: 1px solid var(--line);
-      background: #000;
+      border: 0;
+      background: transparent;
       overflow: hidden;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
-    .preview:hover { border-color: var(--cyan); }
     .preview video {
+      flex: 1 1 auto;
+      min-height: 0;
       width: 100%;
-      height: 100%;
       object-fit: cover;
       display: block;
+      border: 1px solid var(--line);
+      background: #000;
     }
+    .preview:hover video { border-color: var(--cyan); }
     .preview .tag {
-      position: absolute;
-      left: 4px;
-      bottom: 3px;
+      flex: 0 0 auto;
       font-size: clamp(8px, 0.8vw, 10px);
       letter-spacing: .16em;
       color: var(--cyan);
-      text-shadow: 0 0 6px #000;
+      line-height: 1.2;
+      text-align: left;
       pointer-events: none;
     }
     .preview.live-off .tag { color: var(--dim); }
@@ -379,7 +530,7 @@
       z-index: 8;
       display: grid;
       place-items: center;
-      background: #050608;
+      background: rgba(5, 6, 8, .78);
       text-align: left;
       padding: clamp(16px, 3vw, 28px);
     }
@@ -455,21 +606,15 @@
       width: clamp(56px, 8vw, 96px);
     }
 
-    .hint {
-      flex: 0 0 auto;
-      font-size: clamp(8px, 0.85vw, 10px);
-      letter-spacing: .04em;
-      color: var(--dim);
-      line-height: 1.45;
-    }
-    .hint a { color: var(--cyan); text-decoration: none; }
-
     @media (max-width: 860px) {
       .set { --dial: clamp(120px, 42vmin, 220px); }
       .plate { flex-wrap: wrap; }
       .body {
         grid-template-columns: 1fr;
         grid-template-rows: auto minmax(0, 1fr);
+      }
+      .body.solo {
+        grid-template-rows: minmax(0, 1fr);
       }
       .tuner {
         flex-direction: column;
@@ -481,16 +626,16 @@
     }
 
     @media (max-height: 520px) {
-      .hint { display: none; }
       .set { --dial: clamp(110px, 34vmin, 180px); }
     }
   </style>
 </head>
-<body>
+<body class="newsboob-page">
+  <div class="carto" aria-hidden="true"></div>
   <div class="desk">
     <div class="set">
       <header class="plate">
-        <div class="wordmark">NEWS<i>BOOB</i></div>
+        <div class="wordmark">NEWS<i>BOOB</i><span class="chan" id="titleChan"></span></div>
         <div class="model">International News</div>
       </header>
 
@@ -502,6 +647,7 @@
             <div id="ticks"></div>
             <div class="pointer" id="pointer"></div>
             <div class="hub"></div>
+            <div class="clock" id="clock" aria-hidden="true">00:00:00</div>
           </div>
 
           <div class="previews" id="previews"></div>
@@ -531,7 +677,7 @@
             <div class="veil" id="veil">
               <div>
                 <h2>NEWSBOOB</h2>
-                <p>One player. Eight public feeds. No account. No chrome ads.</p>
+                <p>One player. Ten public HLS feeds. No account. No YouTube. No chrome ads.</p>
                 <button class="power" id="power" type="button">POWER</button>
               </div>
             </div>
@@ -554,20 +700,14 @@
                 <input id="vol" type="range" min="0" max="100" value="80" />
               </label>
               <button class="bezel-btn" id="muteBtn" type="button">Mute</button>
+              <button class="bezel-btn" id="reloadBtn" type="button">Reload</button>
               <button class="bezel-btn" id="fsBtn" type="button">Full</button>
             </div>
           </div>
         </section>
       </div>
-
-      <p class="hint">
-        Click the dial, a monitor tile, or keys 1–8.
-        HLS monitors sit under the dial in a compact grid. YouTube-only and browser-fallback tiles remain selectable.
-        <span id="siteLine"></span>
-      </p>
     </div>
   </div>
-
   <script>
     const STATIONS = [
       {
@@ -594,6 +734,21 @@
         site: "https://www.euronews.com/live"
       },
       {
+        id: "rt", label: "RT", name: "RT News",
+        hls: [
+          "https://rt-glb.rttv.com/dvr/rtnews/playlist.m3u8",
+          "https://rt-glb.rttv.com/live/rtnews/playlist.m3u8"
+        ],
+        site: "https://www.rt.com/"
+      },
+      {
+        id: "cna", label: "CNA", name: "CNA Singapore",
+        hls: [
+          "https://mediacorp-nca-prod-videos-bclive.akamaized.net/6379472319112/ap-southeast-1/6057994443001/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJob3N0IjoicGE2ODB1LmVncmVzcy5wcHRpOHciLCJhY2NvdW50X2lkIjoiNjA1Nzk5NDQ0MzAwMSIsImVobiI6Im1lZGlhY29ycC1uY2EtcHJvZC12aWRlb3MtYmNsaXZlLmFrYW1haXplZC5uZXQiLCJpc3MiOiJibGl2ZS1wbGF5YmFjay1zb3VyY2UtYXBpIiwic3ViIjoicGF0aG1hcHRva2VuIiwiYXVkIjpbIjYwNTc5OTQ0NDMwMDEiXSwianRpIjoiNjM3OTQ3MjMxOTExMiJ9.Cw77amOc6efNO32Sw9nD0SOhjQUc5ewKN8ZWJOPt15Y/playlist-hls.m3u8"
+        ],
+        site: "https://www.channelnewsasia.com/watch"
+      },
+      {
         id: "sky", label: "SKY", name: "Sky News",
         hls: [
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/17501/sde-fast-skynews/master.m3u8",
@@ -602,9 +757,11 @@
         site: "https://news.sky.com/watch-live"
       },
       {
-        id: "fox", label: "Fox", name: "LiveNOW from FOX",
-        ytid: "wxGyLND8wCo",
-        site: "https://www.livenowfox.com/"
+        id: "bbg", label: "BBG", name: "Bloomberg TV",
+        hls: [
+          "https://www.bloomberg.com/media-manifest/streams/us.m3u8"
+        ],
+        site: "https://www.bloomberg.com/live"
       },
       {
         id: "cbs", label: "CBS", name: "CBS News 24/7",
@@ -615,9 +772,11 @@
         site: "https://www.cbsnews.com/live/"
       },
       {
-        id: "abc", label: "ABC", name: "ABC News Live",
-        ytid: "iipR5yUp36o",
-        site: "https://abcnews.go.com/Live"
+        id: "nmx", label: "NMX", name: "Newsmax",
+        hls: [
+          "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
+        ],
+        site: "https://www.newsmax.com/max-tv/"
       },
       {
         id: "fstv", label: "FSTV", name: "Free Speech TV",
@@ -643,7 +802,6 @@
       power: document.getElementById("power"),
       pwrLed: document.getElementById("pwrLed"),
       srcLabel: document.getElementById("srcLabel"),
-      siteLine: document.getElementById("siteLine"),
       video: document.getElementById("hlsVideo"),
       ytHost: document.getElementById("yt"),
       vol: document.getElementById("vol"),
@@ -652,8 +810,11 @@
       prevBtn: document.getElementById("prevBtn"),
       nextBtn: document.getElementById("nextBtn"),
       panelBtn: document.getElementById("panelBtn"),
+      reloadBtn: document.getElementById("reloadBtn"),
       layout: document.getElementById("layout"),
-      previews: document.getElementById("previews")
+      previews: document.getElementById("previews"),
+      titleChan: document.getElementById("titleChan"),
+      clock: document.getElementById("clock")
     };
 
     let on = false;
@@ -766,7 +927,7 @@
       tile.setAttribute("aria-label", "Monitor " + station.name);
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = station.label;
+      tag.textContent = station.name;
       tile.addEventListener("click", () => go(stationIndex));
       el.previews.appendChild(tile);
 
@@ -813,7 +974,7 @@
     }
 
     function syncPreviews() {
-      if (!on) {
+      if (!on || !panelOpen) {
         [...previewPlayers.keys()].forEach(killPreview);
         el.previews.classList.remove("on");
         return;
@@ -842,9 +1003,7 @@
       el.sub.textContent = detail || s.name;
       el.srcLabel.textContent = on ? src : "off";
       el.pwrLed.className = "dot" + (on ? " on" : "");
-      el.siteLine.innerHTML = s.site
-        ? ` · <a href="${s.site}" target="_blank" rel="noopener">open ${s.name}</a>`
-        : "";
+      el.titleChan.textContent = on ? ": " + s.name : "";
     }
 
     function playHls(url, gen) {
@@ -866,6 +1025,18 @@
           if (gen !== token) return reject(err);
           stopHls();
           reject(err || new Error("hls"));
+        };
+        const keepAlive = (data) => {
+          if (!hls) return;
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            hls.startLoad();
+            return;
+          }
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            recoveries += 1;
+            if (recoveries % 3 === 0) hls.swapAudioCodec();
+            hls.recoverMediaError();
+          }
         };
         const startPlayback = () => {
           const done = () => resolve("hls");
@@ -895,19 +1066,48 @@
           hls = new Hls({
             enableWorker: true,
             lowLatencyMode: false,
+            capLevelToPlayerSize: false,
+            startLevel: -1,
+            abrEwmaDefaultEstimate: 8000000,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 8,
+            maxBufferLength: 24,
+            maxMaxBufferLength: 48,
+            backBufferLength: 12,
+            manifestLoadingTimeOut: 15000,
+            fragLoadingTimeOut: 20000,
             xhrSetup(xhr) {
               try { xhr.withCredentials = false; } catch (_) {}
             }
           });
-          hls.on(Hls.Events.MANIFEST_PARSED, ok);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            const levels = hls.levels || [];
+            let best = 0;
+            levels.forEach((lvl, i) => {
+              const h0 = levels[best].height || 0;
+              const h1 = lvl.height || 0;
+              if (h1 > h0 || (h1 === h0 && (lvl.bitrate || 0) > (levels[best].bitrate || 0))) best = i;
+            });
+            hls.autoLevelCapping = -1;
+            hls.startLevel = best;
+            hls.nextLevel = best;
+            ok();
+          });
           hls.on(Hls.Events.ERROR, (_, data) => {
-            if (!data.fatal) return;
-            if (recoveries < 2 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (!data.fatal) {
+              if (data.details === "bufferStalledError") hls.startLoad();
+              return;
+            }
+            if (settled) {
+              keepAlive(data);
+              return;
+            }
+            if (recoveries < 3 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
               recoveries += 1;
               hls.startLoad();
               return;
             }
-            if (recoveries < 2 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            if (recoveries < 3 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
               recoveries += 1;
               hls.recoverMediaError();
               return;
@@ -943,29 +1143,12 @@
       el.offair.classList.remove("hidden");
       el.offTitle.textContent = station.label;
       el.offCopy.textContent = detail ||
-        (station.name + " is not using a YouTube player here. Open their live page if this feed is down.");
+        (station.name + " native stream did not lock. Open their live page if this feed is down.");
       el.offLink.href = station.site;
     }
 
     function hideOffAir() {
       el.offair.classList.add("hidden");
-    }
-
-    function playYoutube(station) {
-      if (!station.ytid) throw new Error("no yt");
-      hideOffAir();
-      stopHls();
-      el.ytHost.style.display = "block";
-      el.ytHost.innerHTML = "";
-      const iframe = document.createElement("iframe");
-      iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(station.ytid) +
-        "?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" +
-        "&mute=" + (muted ? "1" : "0");
-      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-      iframe.allowFullscreen = true;
-      iframe.referrerPolicy = "strict-origin-when-cross-origin";
-      iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#000";
-      el.ytHost.appendChild(iframe);
     }
 
     async function go(i) {
@@ -981,7 +1164,7 @@
 
     async function lock(i) {
       if (on) syncPreviews();
-      if (locked === i && (hls || el.ytHost.querySelector("iframe")) && el.offair.classList.contains("hidden")) return;
+      if (locked === i && hls && el.offair.classList.contains("hidden")) return;
       const s = STATIONS[i];
       const gen = ++token;
       locked = i;
@@ -1004,20 +1187,7 @@
         }
       }
 
-      if (s.ytid) {
-        try {
-          playYoutube(s);
-          setStatus("YouTube Live", s.name);
-          applyVolume();
-          return;
-        } catch (_) {
-          showOffAir(s, s.name + " is not available as an embed.");
-          setStatus("no lock", s.name);
-          return;
-        }
-      }
-
-      showOffAir(s, s.name + " has no public embed we can play in this tuner.");
+      showOffAir(s, s.name + " has no public HLS stream we can play in this tuner.");
       setStatus("no lock", s.name);
     }
 
@@ -1042,6 +1212,48 @@
         el.previews.classList.remove("on");
       }
     }
+
+    async function reloadStream() {
+      if (!on) {
+        go(index);
+        return;
+      }
+      locked = -1;
+      stopHls();
+      stopYt();
+      await lock(index);
+    }
+
+    let stallTicks = 0;
+    let lastMediaTime = -1;
+    let reloading = false;
+    setInterval(() => {
+      if (!on || reloading || document.hidden) {
+        stallTicks = 0;
+        return;
+      }
+      if (el.offair && !el.offair.classList.contains("hidden")) {
+        stallTicks = 0;
+        return;
+      }
+      const v = el.video;
+      if (!v || v.style.display === "none" || v.paused) {
+        stallTicks = 0;
+        return;
+      }
+      if (v.readyState < 2 || v.currentTime <= 0) {
+        stallTicks = 0;
+        return;
+      }
+      const t = v.currentTime;
+      if (t <= lastMediaTime + 0.05) stallTicks += 1;
+      else stallTicks = 0;
+      lastMediaTime = t;
+      if (stallTicks < 5) return;
+      stallTicks = 0;
+      reloading = true;
+      Promise.resolve(reloadStream()).finally(() => { reloading = false; });
+    }, 2000);
 
     function applyVolume() {
       const v = Number(el.vol.value);
@@ -1070,6 +1282,7 @@
     el.vol.addEventListener("input", applyVolume);
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
+    el.reloadBtn.addEventListener("click", () => reloadStream());
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
@@ -1108,6 +1321,7 @@
     window.addEventListener("keydown", (e) => {
       if (e.target.matches("input, textarea")) return;
       if (/^[1-9]$/.test(e.key) && Number(e.key) <= STATIONS.length) go(Number(e.key) - 1);
+      if (e.key === "0" && STATIONS.length >= 10) go(9);
       if (e.key === "ArrowRight" || e.key === "ArrowDown") go(index + 1);
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") go(index - 1);
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
@@ -1126,6 +1340,14 @@
         else rec.video.play().catch(() => {});
       });
     });
+
+    function tickClock() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      el.clock.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
 
     setPanel(panelOpen);
     setPointer(index);
