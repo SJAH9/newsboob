@@ -1,0 +1,41 @@
+name: First release
+
+on:
+  push:
+    paths:
+      - ".github/workflows/release.yml"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fetch tuner from live site
+        run: |
+          curl -fsSL -o newsboob.html https://sidhubbard.com/newsboob/
+          git config user.name "SJAH9"
+          git config user.email "research@sidhubbard.com"
+          git add newsboob.html
+          if git diff --cached --quiet; then
+            echo "newsboob.html already current"
+          else
+            git commit -m "Add newsboob.html"
+            git push
+          fi
+      - name: Publish v1.0.0
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: NEWSBOOB v1.0.0
+          make_latest: true
+          files: newsboob.html
+          body: |
+            First public release of NEWSBOOB, a standalone world-news tuner.
+
+            Live: https://sidhubbard.com/newsboob
+
+            Open `newsboob.html` locally, or use the live URL. No GitHub Pages deploy.
