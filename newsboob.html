@@ -621,6 +621,7 @@
       },
       {
         id: "iw", label: "IW", name: "InfoWars Network",
+        nativeHls: "https://prod-fastly-us-east-1.video.pscp.tv/Transcoding/v1/hls/noGEWpH8PthIN--SYw2CXSSQUTgME86LpeBXyfyDOynuJaIA7eyBQna8wjbqyc_aAGyZRa5rpZO56GyUOzRPdg/non_transcode/us-east-1/periscope-replay-direct-prod-us-east-1-public/master_dynamic_16707540419954543582.m3u8?type=replay",
         hls: [
           "https://hugh.cdn.rumble.cloud/live/r31jzt5k/slot-128/ty8d-h44n_720p/chunklist.m3u8",
           "https://hugh.cdn.rumble.cloud/live/r31jzt5k/slot-128/ty8d-h44n_360p/chunklist.m3u8"
@@ -709,6 +710,13 @@
     function hlsList(station) {
       if (!station.hls) return [];
       return Array.isArray(station.hls) ? station.hls : [station.hls];
+    }
+
+    function playbackHlsList(station) {
+      const urls = hlsList(station);
+      if (!station.nativeHls || !el.video.canPlayType("application/vnd.apple.mpegurl")) return urls;
+      const nativeUrls = Array.isArray(station.nativeHls) ? station.nativeHls : [station.nativeHls];
+      return nativeUrls.concat(urls);
     }
 
     function hlsPreviewConfig() {
@@ -924,7 +932,7 @@
     }
 
     async function playNative(station, gen) {
-      const urls = hlsList(station);
+      const urls = playbackHlsList(station);
       let last = null;
       for (const url of urls) {
         if (gen !== token) return;
