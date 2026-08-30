@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NEWSBOOB — world news tuner</title>
+  <meta name="description" content="A standalone news stream viewer. One player, one dial. No account, no extra ads." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.23/dist/hls.min.js"></script>
+  <style>
+    :root {
+      --bg: #050608;
+      --panel: #08090c;
+      --line: #1c2430;
+      --text: #c8d0d8;
+      --dim: #5c6773;
+      --cyan: #3dffd2;
+      --mag: #ff2d95;
+      --screen: #000;
+      --font: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      min-height: 100dvh;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      background:
+        linear-gradient(rgba(61,255,210,.03) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, rgba(61,255,210,.03) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--bg);
+      overflow: hidden;
+    }
+
+    .desk {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .set {
+      width: min(1280px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 16px 18px 14px;
+    }
+
+    .plate {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 0 14px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+
+    .wordmark {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+    .wordmark i {
+      font-style: normal;
+      color: var(--text);
+    }
+
+    .model {
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .body {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .tuner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 0 0;
+    }
+
+    .dial-wrap {
+      width: 228px;
+      height: 228px;
+      position: relative;
+      user-select: none;
+      touch-action: none;
+      cursor: grab;
+    }
+    .dial-wrap:active { cursor: grabbing; }
+    .dial-wrap:active .pointer { transition: none; }
+
+    .dial-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--line);
+    }
+
+    .dial-face {
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background: #06070a;
+      border: 1px solid #151b24;
+    }
+
+    .pointer {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 2px;
+      height: 42%;
+      margin-left: -1px;
+      margin-top: -42%;
+      transform-origin: 50% 100%;
+      transform: rotate(0deg);
+      transition: transform .2s ease;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .pointer::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 2px;
+      height: calc(100% - 18px);
+      background: var(--cyan);
+      box-shadow: 0 0 8px rgba(61,255,210,.5);
+    }
+    .hub {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin: -7px 0 0 -7px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--cyan);
+      z-index: 4;
+      pointer-events: none;
+    }
+    .hub::after { display: none; }
+
+    .tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      transform-origin: 0 0;
+    }
+    .tick span {
+      position: absolute;
+      top: -108px;
+      left: -28px;
+      width: 56px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      cursor: pointer;
+      z-index: 6;
+      pointer-events: auto;
+    }
+    .tick.on span {
+      color: var(--cyan);
+    }
+    .tick i {
+      position: absolute;
+      top: -90px;
+      left: 0;
+      width: 1px;
+      height: 8px;
+      background: var(--line);
+      pointer-events: none;
+    }
+    .tick.on i { background: var(--cyan); }
+
+    .readout {
+      width: 100%;
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+    }
+    .readout .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+    .call {
+      color: var(--cyan);
+      font-size: 14px;
+      letter-spacing: .18em;
+    }
+    .live {
+      color: var(--mag);
+      font-size: 10px;
+      letter-spacing: .22em;
+      animation: blink 1.6s infinite;
+    }
+    .live.off { color: #3a2430; animation: none; }
+    .sub {
+      margin-top: 6px;
+      color: var(--dim);
+      font-size: 11px;
+      letter-spacing: .06em;
+      min-height: 1.3em;
+    }
+
+    @keyframes blink {
+      0%, 70% { opacity: 1; }
+      85% { opacity: .2; }
+      100% { opacity: 1; }
+    }
+
+    .keys {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .keys button, .bezel-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      font: 500 11px/1 var(--font);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      padding: 10px 8px;
+      cursor: pointer;
+    }
+    .keys button:hover, .bezel-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .keys button:active, .bezel-btn:active { background: #0c1210; }
+
+    .tv {
+      border: 1px solid var(--line);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+    }
+
+    .screen-frame {
+      position: relative;
+      flex: 1;
+      background: var(--screen);
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+      border: 1px solid #11161c;
+    }
+
+    #stage, #yt, #hlsVideo, .veil, .scan {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #hlsVideo { background: #000; object-fit: contain; }
+    #yt { border: 0; }
+    .scan {
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(61,255,210,.03) 0 1px,
+        transparent 1px 4px
+      );
+      z-index: 4;
+    }
+    .glass { display: none; }
+
+    .veil {
+      z-index: 6;
+      display: grid;
+      place-items: center;
+      background: #050608;
+      text-align: left;
+      padding: 28px;
+    }
+    .veil.hidden { display: none; }
+    .veil h2 {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: .28em;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+    .veil p {
+      max-width: 42ch;
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+    .power {
+      appearance: none;
+      border: 1px solid var(--cyan);
+      background: transparent;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      cursor: pointer;
+      padding: 10px 18px;
+      color: var(--cyan);
+      font: 500 11px/1 var(--font);
+      letter-spacing: .22em;
+      box-shadow: none;
+    }
+    .power:hover { background: rgba(61,255,210,.08); }
+
+    .under {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 2px 2px;
+    }
+    .leds {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 0;
+      background: #1a2028;
+    }
+    .dot.on { background: var(--cyan); }
+    .dot.warn { background: var(--mag); }
+
+    .bezel-controls { display: flex; gap: 8px; align-items: center; }
+    .vol {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--dim);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .vol input {
+      accent-color: var(--cyan);
+      width: 88px;
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 10px;
+      letter-spacing: .04em;
+      color: var(--dim);
+      line-height: 1.5;
+    }
+    .hint a { color: var(--cyan); text-decoration: none; }
+
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+      .desk { padding: 10px; }
+      .plate { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .body { grid-template-columns: 1fr; }
+      .tuner { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .dial-wrap { width: 200px; height: 200px; }
+      .tick span { top: -94px; font-size: 10px; }
+      .tick i { top: -78px; }
+      .tv { min-height: 0; }
+      .under { flex-wrap: wrap; row-gap: 8px; }
+      .vol input { width: 64px; }
+      .bezel-controls { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="desk">
+    <div class="set">
+      <header class="plate">
+        <div class="wordmark">NEWS<i>BOOB</i></div>
+        <div class="model">NB-8 / TUNER</div>
+      </header>
+
+      <div class="body">
+        <aside class="tuner">
+          <div class="dial-wrap" id="dial" aria-label="Station dial">
+            <div class="dial-ring"></div>
+            <div class="dial-face"></div>
+            <div id="ticks"></div>
+            <div class="pointer" id="pointer"></div>
+            <div class="hub"></div>
+          </div>
+
+          <div class="readout" aria-live="polite">
+            <div class="row">
+              <span class="call" id="call">STANDBY</span>
+              <span class="live off" id="live">LIVE</span>
+            </div>
+            <div class="sub" id="sub">Power on, then turn the dial.</div>
+          </div>
+
+          <div class="keys">
+            <button type="button" id="prevBtn">Prev</button>
+            <button type="button" id="nextBtn">Next</button>
+          </div>
+        </aside>
+
+        <section class="tv">
+          <div class="screen-frame">
+            <div id="stage">
+              <video id="hlsVideo" playsinline></video>
+              <div id="yt"></div>
+            </div>
+            <div class="scan"></div>
+            <div class="glass"></div>
+            <div class="veil" id="veil">
+              <div>
+                <h2>NEWSBOOB</h2>
+                <p>One player. Eight public feeds. No account. No chrome ads.</p>
+                <button class="power" id="power" type="button">POWER</button>
+              </div>
+            </div>
+            <div class="veil hidden" id="offair">
+              <div>
+                <h2 id="offTitle">No lock</h2>
+                <p id="offCopy">Could not open this public feed. Try the official live page.</p>
+                <a class="bezel-btn" id="offLink" href="#" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">Open official live</a>
+              </div>
+            </div>
+          </div>
+          <div class="under">
+            <div class="leds">
+              <span class="dot" id="pwrLed"></span>
+              <span id="srcLabel">off</span>
+            </div>
+            <div class="bezel-controls">
+              <label class="vol">Vol
+                <input id="vol" type="range" min="0" max="100" value="80" />
+              </label>
+              <button class="bezel-btn" id="muteBtn" type="button">Mute</button>
+              <button class="bezel-btn" id="fsBtn" type="button">Full</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <p class="hint">
+        Click the dial, drag the knob, or use 1–8 and arrow keys.
+        Native streams: DW, F24, SKY, CNN, CBS. Fox and ABC use a plain YouTube embed (no player API). BBC has no public embed outside iPlayer.
+        <span id="siteLine"></span>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const STATIONS = [
+      {
+        id: "dw", label: "DW", name: "Deutsche Welle",
+        hls: [
+          "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
+          "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8"
+        ],
+        site: "https://www.dw.com/en/live-tv/channel-english"
+      },
+      {
+        id: "f24", label: "F24", name: "France 24",
+        hls: [
+          "https://live.france24.com/hls/live/2037218-b/F24_EN_HI_HLS/master_5000.m3u8",
+          "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8"
+        ],
+        site: "https://www.france24.com/en/live"
+      },
+      {
+        id: "bbc", label: "BBC", name: "BBC News",
+        ytid: null,
+        site: "https://www.bbc.com/watch-live-news"
+      },
+      {
+        id: "sky", label: "SKY", name: "Sky News",
+        hls: [
+          "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/17501/sde-fast-skynews/master.m3u8",
+          "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/v1/master/6404a5d732e04991ed59ac7790b61cc065c9aabd/prod-gb-lin-skynews-hls-25-web/master.m3u8"
+        ],
+        site: "https://news.sky.com/watch-live"
+      },
+      {
+        id: "fox", label: "Fox", name: "LiveNOW from FOX",
+        ytid: "wxGyLND8wCo",
+        site: "https://www.livenowfox.com/"
+      },
+      {
+        id: "cnn", label: "CNN", name: "CNN",
+        hls: [
+          "https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8"
+        ],
+        site: "https://www.cnn.com"
+      },
+      {
+        id: "cbs", label: "CBS", name: "CBS News 24/7",
+        hls: [
+          "https://news20e7hhcb.airspace-cdn.cbsivideo.com/index.m3u8",
+          "https://cbsnews.akamaized.net/hls/live/2020607/cbsnlineup_8/master.m3u8"
+        ],
+        site: "https://www.cbsnews.com/live/"
+      },
+      {
+        id: "abc", label: "ABC", name: "ABC News Live",
+        ytid: "iipR5yUp36o",
+        site: "https://abcnews.go.com/Live"
+      }
+    ];
+
+    const el = {
+      dial: document.getElementById("dial"),
+      ticks: document.getElementById("ticks"),
+      pointer: document.getElementById("pointer"),
+      call: document.getElementById("call"),
+      live: document.getElementById("live"),
+      sub: document.getElementById("sub"),
+      veil: document.getElementById("veil"),
+      offair: document.getElementById("offair"),
+      offTitle: document.getElementById("offTitle"),
+      offCopy: document.getElementById("offCopy"),
+      offLink: document.getElementById("offLink"),
+      power: document.getElementById("power"),
+      pwrLed: document.getElementById("pwrLed"),
+      srcLabel: document.getElementById("srcLabel"),
+      siteLine: document.getElementById("siteLine"),
+      video: document.getElementById("hlsVideo"),
+      ytHost: document.getElementById("yt"),
+      vol: document.getElementById("vol"),
+      muteBtn: document.getElementById("muteBtn"),
+      fsBtn: document.getElementById("fsBtn"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn")
+    };
+
+    let on = false;
+    let index = Number(localStorage.getItem("newsboob.station") || 0) % STATIONS.length;
+    let locked = -1;
+    let token = 0;
+    let hls = null;
+    let muted = false;
+    let dragging = false;
+    let dragIndex = index;
+    let needle = index * 45;
+
+    STATIONS.forEach((s, i) => {
+      const tick = document.createElement("div");
+      tick.className = "tick";
+      tick.style.transform = `rotate(${i * 45}deg)`;
+      tick.innerHTML = `<i></i><span style="transform:rotate(${-i * 45}deg)">${s.label}</span>`;
+      tick.querySelector("span").addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        go(i);
+      });
+      el.ticks.appendChild(tick);
+    });
+
+    function setPointer(i) {
+      const target = i * 45;
+      const delta = ((target - needle + 540) % 360) - 180;
+      needle += delta;
+      el.pointer.style.transform = `rotate(${needle}deg)`;
+      [...el.ticks.children].forEach((t, n) => t.classList.toggle("on", n === i));
+    }
+
+    function stopHls() {
+      if (hls) { hls.destroy(); hls = null; }
+      el.video.onloadedmetadata = null;
+      el.video.onerror = null;
+      el.video.pause();
+      el.video.removeAttribute("src");
+      el.video.load();
+      el.video.style.display = "none";
+    }
+
+    function stopYt() {
+      el.ytHost.innerHTML = "";
+      el.ytHost.style.display = "none";
+    }
+
+    function hlsList(station) {
+      if (!station.hls) return [];
+      return Array.isArray(station.hls) ? station.hls : [station.hls];
+    }
+
+    function setStatus(src, detail) {
+      const s = STATIONS[index];
+      el.call.textContent = on ? s.label : "STANDBY";
+      el.live.classList.toggle("off", !on);
+      el.sub.textContent = detail || s.name;
+      el.srcLabel.textContent = on ? src : "off";
+      el.pwrLed.className = "dot" + (on ? " on" : "");
+      el.siteLine.innerHTML = s.site
+        ? ` · <a href="${s.site}" target="_blank" rel="noopener">open ${s.name}</a>`
+        : "";
+    }
+
+    function playHls(url, gen) {
+      return new Promise((resolve, reject) => {
+        stopYt();
+        hideOffAir();
+        el.video.style.display = "block";
+        el.video.muted = muted;
+        el.video.volume = Number(el.vol.value) / 100;
+
+        let settled = false;
+        let recoveries = 0;
+        const fail = (err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          if (gen !== token) return reject(err);
+          stopHls();
+          reject(err || new Error("hls"));
+        };
+        const ok = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          if (gen !== token) return;
+          el.video.play().then(() => resolve("hls")).catch(() => resolve("hls"));
+        };
+        const timer = setTimeout(() => fail(new Error("timeout")), 14000);
+
+        if (el.video.canPlayType("application/vnd.apple.mpegurl")) {
+          el.video.src = url;
+          el.video.onloadedmetadata = ok;
+          el.video.onerror = () => fail(new Error("video"));
+          return;
+        }
+        if (window.Hls && Hls.isSupported()) {
+          hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: false,
+            xhrSetup(xhr) {
+              try { xhr.withCredentials = false; } catch (_) {}
+            }
+          });
+          hls.loadSource(url);
+          hls.attachMedia(el.video);
+          hls.on(Hls.Events.MANIFEST_PARSED, ok);
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            if (!data.fatal) return;
+            if (recoveries < 2 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+              recoveries += 1;
+              hls.startLoad();
+              return;
+            }
+            if (recoveries < 2 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+              recoveries += 1;
+              hls.recoverMediaError();
+              return;
+            }
+            fail(data);
+          });
+          return;
+        }
+        fail(new Error("no hls"));
+      });
+    }
+
+    async function playNative(station, gen) {
+      const urls = hlsList(station);
+      let last = null;
+      for (const url of urls) {
+        if (gen !== token) return;
+        try {
+          await playHls(url, gen);
+          return "hls";
+        } catch (err) {
+          last = err;
+        }
+      }
+      throw last || new Error("hls");
+    }
+
+    function showOffAir(station, detail) {
+      stopHls();
+      stopYt();
+      el.offair.classList.remove("hidden");
+      el.offTitle.textContent = station.label;
+      el.offCopy.textContent = detail ||
+        (station.name + " is not using a YouTube player here. Open their live page if this feed is down.");
+      el.offLink.href = station.site;
+    }
+
+    function hideOffAir() {
+      el.offair.classList.add("hidden");
+    }
+
+    function playYoutube(station) {
+      if (!station.ytid) throw new Error("no yt");
+      hideOffAir();
+      stopHls();
+      el.ytHost.style.display = "block";
+      el.ytHost.innerHTML = "";
+      const iframe = document.createElement("iframe");
+      iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(station.ytid) +
+        "?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" +
+        "&mute=" + (muted ? "1" : "0");
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#000";
+      el.ytHost.appendChild(iframe);
+    }
+
+    async function go(i) {
+      i = (i + STATIONS.length) % STATIONS.length;
+      index = i;
+      localStorage.setItem("newsboob.station", String(index));
+      setPointer(index);
+      if (!on) {
+        powerOn();
+      }
+      await lock(index);
+    }
+
+    async function lock(i) {
+      if (locked === i && (hls || el.ytHost.querySelector("iframe")) && el.offair.classList.contains("hidden")) return;
+      const s = STATIONS[i];
+      const gen = ++token;
+      locked = i;
+      hideOffAir();
+      setStatus("tuning", s.name + " · locking signal…");
+      el.pwrLed.className = "dot warn";
+
+      if (hlsList(s).length) {
+        try {
+          await playNative(s, gen);
+          if (gen !== token) return;
+          setStatus("source stream", s.name);
+          applyVolume();
+          return;
+        } catch (_) {
+          if (gen !== token) return;
+          showOffAir(s, s.name + " native stream did not lock. Use the official live page.");
+          setStatus("no lock", s.name);
+          return;
+        }
+      }
+
+      if (s.ytid) {
+        try {
+          playYoutube(s);
+          setStatus("YouTube Live", s.name);
+          applyVolume();
+          return;
+        } catch (_) {
+          showOffAir(s, s.name + " is not available as an embed.");
+          setStatus("no lock", s.name);
+          return;
+        }
+      }
+
+      showOffAir(s, s.name + " has no public embed we can play in this tuner.");
+      setStatus("no lock", s.name);
+    }
+
+    function powerOn() {
+      on = true;
+      el.veil.classList.add("hidden");
+      el.pwrLed.className = "dot on";
+    }
+
+    function applyVolume() {
+      const v = Number(el.vol.value);
+      el.video.volume = v / 100;
+      el.video.muted = muted;
+      el.muteBtn.textContent = muted ? "Unmute" : "Mute";
+    }
+
+    function angleIndex(evt) {
+      const r = el.dial.getBoundingClientRect();
+      const pt = evt.clientX != null ? evt : (evt.touches && evt.touches[0]);
+      const x = pt.clientX - (r.left + r.width / 2);
+      const y = pt.clientY - (r.top + r.height / 2);
+      let deg = Math.atan2(y, x) * 180 / Math.PI + 90;
+      if (deg < 0) deg += 360;
+      return Math.round(deg / 45) % 8;
+    }
+
+    el.power.addEventListener("click", () => go(index));
+    el.prevBtn.addEventListener("click", () => go(index - 1));
+    el.nextBtn.addEventListener("click", () => go(index + 1));
+    el.vol.addEventListener("input", applyVolume);
+    el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
+    el.fsBtn.addEventListener("click", () => {
+      const box = document.querySelector(".screen-frame");
+      if (!document.fullscreenElement) box.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    });
+
+    el.dial.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("span")) return;
+      dragging = true;
+      el.dial.setPointerCapture?.(e.pointerId);
+      dragIndex = angleIndex(e);
+      setPointer(dragIndex);
+    });
+    el.dial.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      dragIndex = angleIndex(e);
+      setPointer(dragIndex);
+    });
+    el.dial.addEventListener("pointerup", () => {
+      if (!dragging) return;
+      dragging = false;
+      go(dragIndex);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.target.matches("input, textarea")) return;
+      if (e.key >= "1" && e.key <= "8") go(Number(e.key) - 1);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") go(index + 1);
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") go(index - 1);
+      if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
+      if (e.key === " ") {
+        e.preventDefault();
+        if (!on) go(index);
+        else { muted = !muted; applyVolume(); }
+      }
+    });
+
+    setPointer(index);
+    setStatus("off", "Power on, then turn the dial.");
+  </script>
+</body>
+</html>
