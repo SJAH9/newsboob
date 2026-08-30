@@ -24,6 +24,8 @@ Native HLS is used when the network publishes a public stream. YouTube is used o
 
 Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–`7` and the arrows.
 
+Use the `<<` control immediately left of the source-stream status (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
+
 While a station is locked, a 2×3 monitor grid sits under the dial so the other channels can be watched without covering the main picture. HLS stations show a live thumbnail. Fox and ABC are YouTube-only tiles. Click a thumbnail to tune that channel.
 
 ## License

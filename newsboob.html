@@ -97,6 +97,10 @@
       gap: clamp(8px, 1.2vw, 16px);
       align-items: stretch;
     }
+    .body.solo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .body.solo .tuner { display: none; }
 
     .tuner {
       min-height: 0;
@@ -476,10 +480,10 @@
     <div class="set">
       <header class="plate">
         <div class="wordmark">NEWS<i>BOOB</i></div>
-        <div class="model">NB-7 / TUNER</div>
+        <div class="model">International News</div>
       </header>
 
-      <div class="body">
+      <div class="body" id="layout">
         <aside class="tuner">
           <div class="dial-wrap" id="dial" aria-label="Station dial">
             <div class="dial-ring"></div>
@@ -530,6 +534,7 @@
           </div>
           <div class="under">
             <div class="leds">
+              <button class="bezel-btn" id="panelBtn" type="button" aria-label="Hide tuner panel" title="Hide tuner panel">&lt;&lt;</button>
               <span class="dot" id="pwrLed"></span>
               <span id="srcLabel">off</span>
             </div>
@@ -628,6 +633,8 @@
       fsBtn: document.getElementById("fsBtn"),
       prevBtn: document.getElementById("prevBtn"),
       nextBtn: document.getElementById("nextBtn"),
+      panelBtn: document.getElementById("panelBtn"),
+      layout: document.getElementById("layout"),
       previews: document.getElementById("previews")
     };
 
@@ -638,6 +645,7 @@
     let hls = null;
     const previewPlayers = new Map();
     let muted = false;
+    let panelOpen = localStorage.getItem("newsboob.panel") !== "0";
     let dragging = false;
     let dragIndex = index;
     const STEP = 360 / STATIONS.length;
@@ -995,7 +1003,22 @@
       on = true;
       el.veil.classList.add("hidden");
       el.pwrLed.className = "dot on";
-      syncPreviews();
+      if (panelOpen) syncPreviews();
+    }
+
+    function setPanel(open) {
+      panelOpen = open;
+      localStorage.setItem("newsboob.panel", open ? "1" : "0");
+      el.layout.classList.toggle("solo", !open);
+      el.panelBtn.textContent = open ? "<<" : ">>";
+      el.panelBtn.setAttribute("aria-label", open ? "Hide tuner panel" : "Show tuner panel");
+      el.panelBtn.title = open ? "Hide tuner panel" : "Show tuner panel";
+      if (!on) return;
+      if (open) syncPreviews();
+      else {
+        [...previewPlayers.keys()].forEach(killPreview);
+        el.previews.classList.remove("on");
+      }
     }
 
     function applyVolume() {
@@ -1024,6 +1047,7 @@
     el.nextBtn.addEventListener("click", () => go(index + 1));
     el.vol.addEventListener("input", applyVolume);
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
+    el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
@@ -1057,6 +1081,7 @@
       if (e.key === "ArrowRight" || e.key === "ArrowDown") go(index + 1);
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") go(index - 1);
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
+      if (e.key.toLowerCase() === "h") setPanel(!panelOpen);
       if (e.key === " ") {
         e.preventDefault();
         if (!on) go(index);
@@ -1072,6 +1097,7 @@
       });
     });
 
+    setPanel(panelOpen);
     setPointer(index);
     setStatus("off", "Power on, then turn the dial.");
   </script>
