@@ -1,0 +1,30 @@
+# NEWSBOOB
+
+A standalone world-news tuner: one player, one dial.
+
+**Live:** [sidhubbard.com/newsboob](https://sidhubbard.com/newsboob)
+
+Open `newsboob.html` in a browser, or use the live URL. No account. No extra chrome ads.
+
+## Stations
+
+| Dial | Source |
+|------|--------|
+| DW | Deutsche Welle HLS |
+| F24 | France 24 HLS |
+| BBC | BBC live page (no public embed outside iPlayer) |
+| SKY | Sky News HLS |
+| Fox | LiveNOW from FOX (YouTube embed) |
+| CNN | CNN HLS |
+| CBS | CBS News 24/7 HLS |
+| ABC | ABC News Live (YouTube embed) |
+
+Native HLS is used when the network publishes a public stream. YouTube is used only when that is the public player.
+
+## Controls
+
+Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–`8` and the arrows.
+
+## License
+
+Personal / research use of this tuner UI. Streamed video remains the property of each broadcaster.
