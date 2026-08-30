@@ -780,6 +780,7 @@
       },
       {
         id: "fstv", label: "FSTV", name: "Free Speech TV",
+        forceHlsJs: true,
         hls: [
           "https://na.linear.zype.com/f2f02a72-71d0-45f3-829f-4ae51f721102/86ef0177-697d-41c4-be57-c4d1a2b83cad-hls4/manifest/live_19.m3u8?rendition=480"
         ],
@@ -1006,7 +1007,7 @@
       el.titleChan.textContent = on ? ": " + s.name : "";
     }
 
-    function playHls(url, gen) {
+    function playHls(url, gen, forceHlsJs) {
       return new Promise((resolve, reject) => {
         stopYt();
         hideOffAir();
@@ -1056,13 +1057,14 @@
         };
         const timer = setTimeout(() => fail(new Error("timeout")), 14000);
 
-        if (el.video.canPlayType("application/vnd.apple.mpegurl")) {
+        const hlsJsSupported = !!(window.Hls && Hls.isSupported());
+        if (el.video.canPlayType("application/vnd.apple.mpegurl") && !(forceHlsJs && hlsJsSupported)) {
           el.video.src = url;
           el.video.onloadedmetadata = ok;
           el.video.onerror = () => fail(new Error("video"));
           return;
         }
-        if (window.Hls && Hls.isSupported()) {
+        if (hlsJsSupported) {
           hls = new Hls({
             enableWorker: true,
             lowLatencyMode: false,
@@ -1128,7 +1130,7 @@
       for (const url of urls) {
         if (gen !== token) return;
         try {
-          await playHls(url, gen);
+          await playHls(url, gen, station.forceHlsJs);
           return "hls";
         } catch (err) {
           last = err;
