@@ -19,23 +19,22 @@ jobs:
           curl -fsSL -o newsboob.html https://sidhubbard.com/newsboob/
           git config user.name "SJAH9"
           git config user.email "research@sidhubbard.com"
-          git add newsboob.html
+          git add newsboob.html README.md
           if git diff --cached --quiet; then
-            echo "newsboob.html already current"
+            echo "already current"
           else
-            git commit -m "Add newsboob.html"
+            git commit -m "Sync tuner from sidhubbard.com/newsboob"
             git push
           fi
-      - name: Publish v1.0.0
+      - name: Publish v1.1.0
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: NEWSBOOB v1.0.0
+          tag_name: v1.1.0
+          name: NEWSBOOB v1.1.0
           make_latest: true
           files: newsboob.html
           body: |
-            First public release of NEWSBOOB, a standalone world-news tuner.
+            Station lineup: DW, F24, EUR, SKY, Fox, CBS, ABC.
+            BBC and CNN removed. Euronews added (native HLS).
 
             Live: https://sidhubbard.com/newsboob
-
-            Open `newsboob.html` locally, or use the live URL. No GitHub Pages deploy.

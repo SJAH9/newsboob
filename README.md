@@ -12,10 +12,9 @@ Open `newsboob.html` in a browser, or use the live URL. No account. No extra chr
 |------|--------|
 | DW | Deutsche Welle HLS |
 | F24 | France 24 HLS |
-| BBC | BBC live page (no public embed outside iPlayer) |
+| EUR | Euronews English HLS |
 | SKY | Sky News HLS |
 | Fox | LiveNOW from FOX (YouTube embed) |
-| CNN | CNN HLS |
 | CBS | CBS News 24/7 HLS |
 | ABC | ABC News Live (YouTube embed) |
 
@@ -23,7 +22,7 @@ Native HLS is used when the network publishes a public stream. YouTube is used o
 
 ## Controls
 
-Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–`8` and the arrows.
+Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–7 and the arrows.
 
 ## License
 
