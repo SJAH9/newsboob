@@ -17,7 +17,6 @@ Open `newsboob.html` in a browser, or use the live URL. No account. No extra chr
 | Fox | LiveNOW from FOX (YouTube embed) |
 | CBS | CBS News 24/7 HLS |
 | ABC | ABC News Live (YouTube embed) |
-| IW | InfoWars Network (direct X HLS with a cookie-free HLS fallback) |
 
 Native HLS is used when the network publishes a public stream. YouTube is used only when that is the public player.
 
