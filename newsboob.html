@@ -402,7 +402,7 @@
     <div class="set">
       <header class="plate">
         <div class="wordmark">NEWS<i>BOOB</i></div>
-        <div class="model">NB-8 / TUNER</div>
+        <div class="model">NB-7 / TUNER</div>
       </header>
 
       <div class="body">
@@ -440,7 +440,7 @@
             <div class="veil" id="veil">
               <div>
                 <h2>NEWSBOOB</h2>
-                <p>One player. Eight public feeds. No account. No chrome ads.</p>
+                <p>One player. Seven public feeds. No account. No chrome ads.</p>
                 <button class="power" id="power" type="button">POWER</button>
               </div>
             </div>
@@ -469,8 +469,8 @@
       </div>
 
       <p class="hint">
-        Click the dial, drag the knob, or use 1–8 and arrow keys.
-        Native streams: DW, F24, SKY, CNN, CBS. Fox and ABC use a plain YouTube embed (no player API). BBC has no public embed outside iPlayer.
+        Click the dial, drag the knob, or use 1–7 and arrow keys.
+        Native streams: DW, F24, EUR, SKY, CBS. Fox and ABC use a plain YouTube embed.
         <span id="siteLine"></span>
       </p>
     </div>
@@ -495,9 +495,11 @@
         site: "https://www.france24.com/en/live"
       },
       {
-        id: "bbc", label: "BBC", name: "BBC News",
-        ytid: null,
-        site: "https://www.bbc.com/watch-live-news"
+        id: "eur", label: "EUR", name: "Euronews",
+        hls: [
+          "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8"
+        ],
+        site: "https://www.euronews.com/live"
       },
       {
         id: "sky", label: "SKY", name: "Sky News",
@@ -511,13 +513,6 @@
         id: "fox", label: "Fox", name: "LiveNOW from FOX",
         ytid: "wxGyLND8wCo",
         site: "https://www.livenowfox.com/"
-      },
-      {
-        id: "cnn", label: "CNN", name: "CNN",
-        hls: [
-          "https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_0_3564000.m3u8"
-        ],
-        site: "https://www.cnn.com"
       },
       {
         id: "cbs", label: "CBS", name: "CBS News 24/7",
@@ -567,13 +562,14 @@
     let muted = false;
     let dragging = false;
     let dragIndex = index;
-    let needle = index * 45;
+    const STEP = 360 / STATIONS.length;
+    let needle = index * STEP;
 
     STATIONS.forEach((s, i) => {
       const tick = document.createElement("div");
       tick.className = "tick";
-      tick.style.transform = `rotate(${i * 45}deg)`;
-      tick.innerHTML = `<i></i><span style="transform:rotate(${-i * 45}deg)">${s.label}</span>`;
+      tick.style.transform = `rotate(${i * STEP}deg)`;
+      tick.innerHTML = `<i></i><span style="transform:rotate(${-i * STEP}deg)">${s.label}</span>`;
       tick.querySelector("span").addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -583,7 +579,7 @@
     });
 
     function setPointer(i) {
-      const target = i * 45;
+      const target = i * STEP;
       const delta = ((target - needle + 540) % 360) - 180;
       needle += delta;
       el.pointer.style.transform = `rotate(${needle}deg)`;
@@ -804,7 +800,8 @@
       const y = pt.clientY - (r.top + r.height / 2);
       let deg = Math.atan2(y, x) * 180 / Math.PI + 90;
       if (deg < 0) deg += 360;
-      return Math.round(deg / 45) % 8;
+      const n = STATIONS.length;
+      return ((Math.round(deg / STEP) % n) + n) % n;
     }
 
     el.power.addEventListener("click", () => go(index));
@@ -838,7 +835,7 @@
 
     window.addEventListener("keydown", (e) => {
       if (e.target.matches("input, textarea")) return;
-      if (e.key >= "1" && e.key <= "8") go(Number(e.key) - 1);
+      if (e.key >= "1" && e.key <= String(STATIONS.length)) go(Number(e.key) - 1);
       if (e.key === "ArrowRight" || e.key === "ArrowDown") go(index + 1);
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") go(index - 1);
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
