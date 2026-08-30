@@ -531,7 +531,7 @@
             <div class="veil" id="veil">
               <div>
                 <h2>NEWSBOOB</h2>
-                <p>One player. Seven public feeds. No account. No chrome ads.</p>
+                <p>One player. Eight public feeds. No account. No chrome ads.</p>
                 <button class="power" id="power" type="button">POWER</button>
               </div>
             </div>
@@ -618,6 +618,13 @@
         id: "abc", label: "ABC", name: "ABC News Live",
         ytid: "iipR5yUp36o",
         site: "https://abcnews.go.com/Live"
+      },
+      {
+        id: "fstv", label: "FSTV", name: "Free Speech TV",
+        hls: [
+          "https://na.linear.zype.com/f2f02a72-71d0-45f3-829f-4ae51f721102/86ef0177-697d-41c4-be57-c4d1a2b83cad-hls4/live.m3u8"
+        ],
+        site: "https://freespeech.org/live-tv/"
       }
     ];
 
@@ -725,12 +732,12 @@
       }
       if (window.Hls && Hls.isSupported()) {
         const player = new Hls(hlsPreviewConfig());
-        player.loadSource(url);
-        player.attachMedia(video);
         player.on(Hls.Events.MANIFEST_PARSED, () => {
           if (player.levels && player.levels.length) player.currentLevel = 0;
           video.play().catch(() => {});
         });
+        player.loadSource(url);
+        player.attachMedia(video);
         return { hls: player };
       }
       return null;
@@ -892,8 +899,6 @@
               try { xhr.withCredentials = false; } catch (_) {}
             }
           });
-          hls.loadSource(url);
-          hls.attachMedia(el.video);
           hls.on(Hls.Events.MANIFEST_PARSED, ok);
           hls.on(Hls.Events.ERROR, (_, data) => {
             if (!data.fatal) return;
@@ -909,6 +914,8 @@
             }
             fail(data);
           });
+          hls.loadSource(url);
+          hls.attachMedia(el.video);
           return;
         }
         fail(new Error("no hls"));

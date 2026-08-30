@@ -17,12 +17,13 @@ Open `newsboob.html` in a browser, or use the live URL. No account. No extra chr
 | Fox | LiveNOW from FOX (YouTube embed) |
 | CBS | CBS News 24/7 HLS |
 | ABC | ABC News Live (YouTube embed) |
+| FSTV | Free Speech TV direct HLS |
 
 Native HLS is used when the network publishes a public stream. YouTube is used only when that is the public player.
 
 ## Controls
 
-Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–`7` and the arrows.
+Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1`–`8` and the arrows.
 
 Use the `<<` control immediately left of the source-stream status (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
 
