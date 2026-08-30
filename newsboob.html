@@ -622,9 +622,9 @@
       {
         id: "iw", label: "IW", name: "InfoWars Network",
         hls: [
-          "https://stream.alexjoneslive.com/live/index.m3u8"
+          "https://hugh.cdn.rumble.cloud/live/r31jzt5k/slot-128/ty8d-h44n_720p/chunklist.m3u8",
+          "https://hugh.cdn.rumble.cloud/live/r31jzt5k/slot-128/ty8d-h44n_360p/chunklist.m3u8"
         ],
-        nativeOnly: true,
         site: "https://www.alexjoneslive.com/show/"
       }
     ];
@@ -823,7 +823,7 @@
         .map((s, i) => ({
           s,
           i,
-          urls: s.nativeOnly && !el.video.canPlayType("application/vnd.apple.mpegurl") ? [] : hlsList(s)
+          urls: hlsList(s)
         }))
         .filter((row) => row.i !== index);
       [...previewPlayers.keys()].forEach((id) => {
@@ -924,9 +924,6 @@
     }
 
     async function playNative(station, gen) {
-      if (station.nativeOnly && !el.video.canPlayType("application/vnd.apple.mpegurl")) {
-        throw new Error("native hls required");
-      }
       const urls = hlsList(station);
       let last = null;
       for (const url of urls) {
@@ -1002,9 +999,7 @@
           return;
         } catch (_) {
           if (gen !== token) return;
-          showOffAir(s, s.nativeOnly
-            ? s.name + " requires native HLS in this browser. Use the official live page."
-            : s.name + " native stream did not lock. Use the official live page.");
+          showOffAir(s, s.name + " native stream did not lock. Use the official live page.");
           setStatus("no lock", s.name);
           return;
         }
