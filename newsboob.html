@@ -60,6 +60,17 @@
       gap: clamp(8px, 1vw, 14px);
     }
 
+    .set:fullscreen,
+    .set:-webkit-full-screen {
+      background: var(--panel);
+      border: 0;
+      height: 100vh;
+      max-width: none;
+      overflow: hidden;
+      padding: clamp(8px, 1.2vw, 16px);
+      width: 100vw;
+    }
+
     .plate {
       flex: 0 0 auto;
       display: flex;
@@ -1052,10 +1063,18 @@
       if (el.video.paused) el.video.play().catch(() => {});
     });
     el.fsBtn.addEventListener("click", () => {
-      const box = document.querySelector(".screen-frame");
-      if (!document.fullscreenElement) box.requestFullscreen?.();
-      else document.exitFullscreen?.();
+      const frame = document.querySelector(".set");
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) (frame.requestFullscreen || frame.webkitRequestFullscreen)?.call(frame);
+      else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
     });
+    function syncFullscreenLabel() {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      el.fsBtn.textContent = active ? "Exit" : "Full";
+      el.fsBtn.setAttribute("aria-label", active ? "Exit full screen" : "Enter full screen with NEWSBOOB frame");
+    }
+    document.addEventListener("fullscreenchange", syncFullscreenLabel);
+    document.addEventListener("webkitfullscreenchange", syncFullscreenLabel);
 
     el.dial.addEventListener("pointerdown", (e) => {
       if (e.target.closest("span")) return;

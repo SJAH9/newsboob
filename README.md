@@ -26,6 +26,8 @@ Click **POWER**, then turn the dial, click a callsign, use Prev/Next, or keys `1
 
 Use the `<<` control immediately left of the source-stream status (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
 
+The **Full** control takes the complete NEWSBOOB set fullscreen, retaining the wordmark, tuner, source status, controls, and player bezel. It changes to **Exit** while fullscreen is active.
+
 While a station is locked, a 2×3 monitor grid sits under the dial so the other channels can be watched without covering the main picture. HLS stations show a live thumbnail. Fox and ABC are YouTube-only tiles. Click a thumbnail to tune that channel.
 
 ## License
