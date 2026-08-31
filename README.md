@@ -6,6 +6,8 @@ A standalone world-news tuner: one player, one dial.
 
 Open `newsboob.html` in a browser, or use the live URL. No account. No extra chrome ads.
 
+The repository file is the standalone presentation. The website’s `/newsboob/` page is the embedded presentation: it uses the same direct player HTML/JavaScript architecture and local HLS engine, with only the site navigation wrapper added. Neither presentation uses an iframe.
+
 ## Stations
 
 | Dial | Source |
