@@ -232,8 +232,10 @@
       video.muted = true;
       video.playsInline = true;
       video.autoplay = true;
+      video.disablePictureInPicture = true;
       video.setAttribute("muted", "");
       video.setAttribute("playsinline", "");
+      video.setAttribute("disablepictureinpicture", "");
       tile.appendChild(video);
       tile.appendChild(tag);
 
