@@ -126,7 +126,7 @@
     };
 
     let on = false;
-    let index = Number(localStorage.getItem("newsboob.station") || 0) % STATIONS.length;
+    let index = 1;
     let locked = -1;
     let token = 0;
     let hls = null;
