@@ -75,6 +75,13 @@
         site: "https://www.newsmax.com/max-tv/"
       },
       {
+        id: "first", label: "FIRST", name: "The First TV",
+        hls: [
+          "https://thefirst-oando.amagi.tv/hls/amagi_hls_data_thefirstd-thefirst-oando/CDN/playlist.m3u8"
+        ],
+        site: "https://www.thefirsttv.com/watch/the-first-tv-live/"
+      },
+      {
         id: "fstv", label: "FSTV", name: "Free Speech TV",
         forceHlsJs: true,
         hls: [
