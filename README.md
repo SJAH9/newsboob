@@ -18,22 +18,28 @@ The repository file is the standalone presentation. The website’s `/newsboob/`
 | RT | RT News HLS |
 | CNA | CNA Singapore HLS |
 | SKY | Sky News HLS |
+| ABC AU | ABC News Australia HLS (with browser-side fallback) |
 | BBG | Bloomberg TV HLS |
 | CBS | CBS News 24/7 HLS |
 | NMX | Newsmax HLS |
+| FIRST | The First TV HLS |
 | FSTV | Free Speech TV direct HLS |
 
 All stations use browser-direct HLS. The HLS engine is included locally; the player does not load an embedded third-party player.
 
 ## Controls
 
-Click **POWER**, then turn the dial, click a callsign, use Prev/Next, keys `1`–`9` and `0`, or the arrows.
+Click **POWER**, then turn the dial, click a callsign, use Prev/Next, keys `1`–`9` and `0`, or the arrows. Keyboard navigation is serialized so rapid arrow presses cannot leave a previous HLS feed attached.
 
-Use the `<<` control immediately left of the source-stream status (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
+Use the `<<` control (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
 
 The **Full** control takes the complete NEWSBOOB set fullscreen, retaining the wordmark, tuner, source status, controls, and player bezel. It changes to **Exit** while fullscreen is active.
 
-While a station is locked, a compact monitor grid sits under the dial so the other channels can be watched without covering the main picture. Compatible stations show a live thumbnail. Click a thumbnail to tune that channel.
+The top **Scan** control starts automatic channel changes every 30 seconds. While scanning, it becomes a countdown timer; the adjacent previous/next buttons change channels and reset the countdown. Click the countdown to stop scanning.
+
+A continuously moving ticker between the source indicator and volume controls lists every channel repeatedly. Each name is clickable and the active channel is highlighted.
+
+While a station is locked, a fixed-position two-column monitor grid sits under the dial. Compatible stations show a live landscape thumbnail with a visible channel title beneath it; hover or focus a thumbnail for a larger title overlay. Click a thumbnail to tune that channel.
 
 ## License
 
