@@ -38,6 +38,13 @@
         site: "https://www.channelnewsasia.com/watch"
       },
       {
+        id: "abcau", label: "ABC AU", name: "ABC News Australia",
+        hls: [
+          "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8"
+        ],
+        site: "https://www.abc.net.au/news/newschannel"
+      },
+      {
         id: "sky", label: "SKY", name: "Sky News",
         hls: [
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/17501/sde-fast-skynews/master.m3u8",
