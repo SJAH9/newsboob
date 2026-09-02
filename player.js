@@ -288,8 +288,7 @@
           s,
           i,
           urls: hlsList(s)
-        }))
-        .filter((row) => row.i !== index);
+        }));
       [...previewPlayers.keys()].forEach((id) => {
         if (!want.some((row) => row.s.id === id)) killPreview(id);
       });
