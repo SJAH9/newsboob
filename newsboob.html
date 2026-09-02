@@ -236,6 +236,8 @@
       color: var(--cyan);
       background: rgba(61, 255, 210, .1);
     }
+    .scan-controls { display: flex; align-items: center; gap: 4px; }
+    .scan-controls .bezel-btn { padding: 5px 7px; }
 
     .body {
       flex: 1 1 auto;
@@ -675,7 +677,7 @@
     <div class="set">
       <header class="plate">
         <div class="wordmark">NEWS<i>BOOB</i><span class="chan" id="titleChan"></span></div>
-        <div class="model"><span>International News</span><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false">Scan</button></div>
+        <div class="model"><span>International News</span><div class="scan-controls"><button class="bezel-btn" id="scanPrevBtn" type="button" aria-label="Previous channel">&lt;</button><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false">Scan</button><button class="bezel-btn" id="scanNextBtn" type="button" aria-label="Next channel">&gt;</button></div></div>
       </header>
 
       <div class="body" id="layout">

@@ -116,6 +116,8 @@
       panelBtn: document.getElementById("panelBtn"),
       reloadBtn: document.getElementById("reloadBtn"),
       scanBtn: document.getElementById("scanBtn"),
+      scanPrevBtn: document.getElementById("scanPrevBtn"),
+      scanNextBtn: document.getElementById("scanNextBtn"),
       layout: document.getElementById("layout"),
       previews: document.getElementById("previews"),
       titleChan: document.getElementById("titleChan"),
@@ -134,6 +136,7 @@
     let dragIndex = index;
     let scanTimer = null;
     let scanMode = false;
+    let scanDeadline = 0;
     const STEP = 360 / STATIONS.length;
     let needle = index * STEP;
 
@@ -524,9 +527,11 @@
       el.scanBtn.textContent = enabled ? "Scan on" : "Scan";
       el.scanBtn.title = enabled ? "Stop automatic channel scanning" : "Scan channels every 30 seconds";
       if (!enabled) return;
+      scanDeadline = Date.now() + 30000;
       if (!on) go(index);
       scanTimer = setInterval(() => {
         if (scanMode && on) go(index + 1);
+        scanDeadline = Date.now() + 30000;
       }, 30000);
     }
 
@@ -616,6 +621,8 @@
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
     el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
+    el.scanPrevBtn.addEventListener("click", () => { if (scanMode) scanDeadline = Date.now() + 30000; go(index - 1); });
+    el.scanNextBtn.addEventListener("click", () => { if (scanMode) scanDeadline = Date.now() + 30000; go(index + 1); });
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
@@ -678,6 +685,12 @@
       const d = new Date();
       const pad = (n) => String(n).padStart(2, "0");
       el.clock.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+      if (scanMode) {
+        const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        el.scanBtn.textContent = "SCAN " + pad(mins) + ":" + pad(secs);
+      }
     }
     tickClock();
     setInterval(tickClock, 1000);
