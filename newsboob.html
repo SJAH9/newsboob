@@ -634,7 +634,8 @@
 
     .bezel-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .ticker {
-      flex: 1 1 auto;
+      flex: 0 1 34%;
+      max-width: 34%;
       min-width: 0;
       overflow: hidden;
       border: 1px solid var(--line);
@@ -657,6 +658,7 @@
     }
     .ticker button:hover, .ticker button:focus-visible { color: var(--cyan); background: rgba(61,255,210,.08); }
     .ticker button.active { color: var(--mag); background: rgba(255,61,154,.1); }
+    .bezel-controls { flex-shrink: 0; }
     @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-35%); } }
     .vol {
       display: flex;
