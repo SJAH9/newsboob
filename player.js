@@ -106,7 +106,6 @@
       offLink: document.getElementById("offLink"),
       power: document.getElementById("power"),
       pwrLed: document.getElementById("pwrLed"),
-      srcLabel: document.getElementById("srcLabel"),
       video: document.getElementById("hlsVideo"),
       ytHost: document.getElementById("yt"),
       vol: document.getElementById("vol"),
@@ -326,7 +325,6 @@
       el.call.textContent = on ? s.label : "STANDBY";
       el.live.classList.toggle("off", !on);
       el.sub.textContent = detail || s.name;
-      el.srcLabel.textContent = on ? src : "off";
       el.pwrLed.className = "dot" + (on ? " on" : "");
       el.titleChan.textContent = on ? ": " + s.name : "";
       [...el.tickerTrack.children].forEach((button, i) => button.classList.toggle("active", on && i === index));
