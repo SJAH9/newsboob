@@ -497,6 +497,12 @@
       await lock(index);
     }
 
+    let navigationQueue = Promise.resolve();
+    function queueGo(i) {
+      navigationQueue = navigationQueue.catch(() => {}).then(() => go(i));
+      return navigationQueue;
+    }
+
     async function lock(i) {
       if (on) syncPreviews();
       if (locked === i && hls && el.offair.classList.contains("hidden")) return;
@@ -679,8 +685,8 @@
       if (e.target.matches("input, textarea")) return;
       if (/^[1-9]$/.test(e.key) && Number(e.key) <= STATIONS.length) go(Number(e.key) - 1);
       if (e.key === "0" && STATIONS.length >= 10) go(9);
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") go(index + 1);
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") go(index - 1);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") queueGo(index + 1);
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") queueGo(index - 1);
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
       if (e.key.toLowerCase() === "h") setPanel(!panelOpen);
       if (e.key === " ") {
