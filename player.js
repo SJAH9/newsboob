@@ -155,10 +155,19 @@
       const tickerButton = document.createElement("button");
       tickerButton.type = "button";
       tickerButton.textContent = s.name;
+      tickerButton.dataset.stationIndex = String(i);
       tickerButton.setAttribute("aria-label", "Select " + s.name);
       tickerButton.addEventListener("click", () => go(i));
       el.tickerTrack.appendChild(tickerButton);
     });
+    const tickerButtons = [...el.tickerTrack.children];
+    for (let repeat = 0; repeat < 2; repeat += 1) {
+      tickerButtons.forEach((button) => {
+        const clone = button.cloneNode(true);
+        clone.addEventListener("click", () => go(Number(clone.dataset.stationIndex)));
+        el.tickerTrack.appendChild(clone);
+      });
+    }
 
     function setPointer(i) {
       const target = i * STEP;
@@ -327,7 +336,7 @@
       el.sub.textContent = detail || s.name;
       el.pwrLed.className = "dot" + (on ? " on" : "");
       el.titleChan.textContent = on ? ": " + s.name : "";
-      [...el.tickerTrack.children].forEach((button, i) => button.classList.toggle("active", on && i === index));
+      [...el.tickerTrack.children].forEach((button) => button.classList.toggle("active", on && Number(button.dataset.stationIndex) === index));
     }
 
     function playHls(url, gen, forceHlsJs) {
