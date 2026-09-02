@@ -38,11 +38,12 @@
         site: "https://www.channelnewsasia.com/watch"
       },
       {
-        id: "skyau", label: "SKY AU", name: "Sky News Australia Extra",
+        id: "abcau", label: "ABC AU", name: "ABC News Australia",
         hls: [
-          "https://skynewsau-live.akamaized.net/hls/live/2002691/skynewsau-extra3/master.m3u8"
+          "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
+          "https://c.mjh.nz/abc-news.m3u8"
         ],
-        site: "https://www.skynews.com.au/page/extra"
+        site: "https://www.abc.net.au/news/newschannel"
       },
       {
         id: "sky", label: "SKY", name: "Sky News",
