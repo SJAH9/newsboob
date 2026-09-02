@@ -679,16 +679,19 @@
       .plate { flex-wrap: wrap; }
       .body {
         grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
       }
       .body.solo {
         grid-template-rows: minmax(0, 1fr);
       }
       .tuner {
+        grid-row: 2;
+        max-height: 42vh;
         flex-direction: column;
         flex-wrap: nowrap;
         justify-content: flex-start;
       }
+      .tv { grid-row: 1; }
       .readout, .keys, .previews { max-width: min(100%, calc(var(--dial) + 48px)); }
       .under { flex-wrap: wrap; }
     }
