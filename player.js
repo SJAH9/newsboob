@@ -115,6 +115,7 @@
       nextBtn: document.getElementById("nextBtn"),
       panelBtn: document.getElementById("panelBtn"),
       reloadBtn: document.getElementById("reloadBtn"),
+      scanBtn: document.getElementById("scanBtn"),
       layout: document.getElementById("layout"),
       previews: document.getElementById("previews"),
       titleChan: document.getElementById("titleChan"),
@@ -131,6 +132,8 @@
     let panelOpen = localStorage.getItem("newsboob.panel") !== "0";
     let dragging = false;
     let dragIndex = index;
+    let scanTimer = null;
+    let scanMode = false;
     const STEP = 360 / STATIONS.length;
     let needle = index * STEP;
 
@@ -302,6 +305,7 @@
       want.forEach(({ s, i, urls }) => {
         if (!previewPlayers.has(s.id)) startPreview(s, i, urls[0] || null, 0);
         else el.previews.appendChild(previewPlayers.get(s.id).tile);
+        previewPlayers.get(s.id).tile.classList.toggle("active", i === index);
       });
       el.previews.classList.toggle("on", previewPlayers.size > 0);
     }
@@ -509,6 +513,23 @@
       if (panelOpen) syncPreviews();
     }
 
+    function setScanMode(enabled) {
+      scanMode = enabled;
+      if (scanTimer) {
+        clearInterval(scanTimer);
+        scanTimer = null;
+      }
+      el.scanBtn.classList.toggle("active", enabled);
+      el.scanBtn.setAttribute("aria-pressed", String(enabled));
+      el.scanBtn.textContent = enabled ? "Scan on" : "Scan";
+      el.scanBtn.title = enabled ? "Stop automatic channel scanning" : "Scan channels every 30 seconds";
+      if (!enabled) return;
+      if (!on) go(index);
+      scanTimer = setInterval(() => {
+        if (scanMode && on) go(index + 1);
+      }, 30000);
+    }
+
     function setPanel(open) {
       panelOpen = open;
       localStorage.setItem("newsboob.panel", open ? "1" : "0");
@@ -594,6 +615,7 @@
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
+    el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
