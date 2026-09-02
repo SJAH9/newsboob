@@ -29,9 +29,9 @@ All stations use browser-direct HLS. The HLS engine is included locally; the pla
 
 ## Controls
 
-Click **POWER**, then turn the dial, click a callsign, use Prev/Next, keys `1`–`9` and `0`, or the arrows. Keyboard navigation is serialized so rapid arrow presses cannot leave a previous HLS feed attached.
+Click **START**, then turn the dial, click a callsign, use Prev/Next, keys `1`–`9` and `0`, or the arrows. Left/right arrows change channels; up/down arrows adjust volume; Space toggles mute; `C` opens or closes the channel drawer; `F` toggles fullscreen; `R` reloads the video; and `S` toggles scan mode. Keyboard navigation is serialized so rapid arrow presses cannot leave a previous HLS feed attached.
 
-Use the `<<` control (or press `H`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
+Use the `<<` control (or press `C`) to hide the tuner panel and give the main player the full width. The control changes to `>>` to restore the tuner.
 
 The **Full** control takes the complete NEWSBOOB set fullscreen, retaining the wordmark, tuner, source status, controls, and player bezel. It changes to **Exit** while fullscreen is active.
 

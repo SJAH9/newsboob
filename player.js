@@ -685,10 +685,15 @@
       if (e.target.matches("input, textarea")) return;
       if (/^[1-9]$/.test(e.key) && Number(e.key) <= STATIONS.length) go(Number(e.key) - 1);
       if (e.key === "0" && STATIONS.length >= 10) go(9);
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") queueGo(index + 1);
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") queueGo(index - 1);
+      if (e.key === "ArrowRight") { e.preventDefault(); queueGo(index + 1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); queueGo(index - 1); }
+      if (e.key === "ArrowUp") { e.preventDefault(); el.vol.value = String(Math.min(100, Number(el.vol.value) + 10)); applyVolume(); }
+      if (e.key === "ArrowDown") { e.preventDefault(); el.vol.value = String(Math.max(0, Number(el.vol.value) - 10)); applyVolume(); }
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
-      if (e.key.toLowerCase() === "h") setPanel(!panelOpen);
+      if (e.key.toLowerCase() === "c") { e.preventDefault(); setPanel(!panelOpen); }
+      if (e.key.toLowerCase() === "f") { e.preventDefault(); el.fsBtn.click(); }
+      if (e.key.toLowerCase() === "r") { e.preventDefault(); reloadStream(); }
+      if (e.key.toLowerCase() === "s") { e.preventDefault(); setScanMode(!scanMode); }
       if (e.key === " ") {
         e.preventDefault();
         if (!on) go(index);
