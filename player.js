@@ -122,6 +122,7 @@
       layout: document.getElementById("layout"),
       previews: document.getElementById("previews"),
       titleChan: document.getElementById("titleChan"),
+      tickerTrack: document.getElementById("tickerTrack"),
       clock: document.getElementById("clock")
     };
 
@@ -152,6 +153,12 @@
         go(i);
       });
       el.ticks.appendChild(tick);
+      const tickerButton = document.createElement("button");
+      tickerButton.type = "button";
+      tickerButton.textContent = s.name;
+      tickerButton.setAttribute("aria-label", "Select " + s.name);
+      tickerButton.addEventListener("click", () => go(i));
+      el.tickerTrack.appendChild(tickerButton);
     });
 
     function setPointer(i) {
@@ -322,6 +329,7 @@
       el.srcLabel.textContent = on ? src : "off";
       el.pwrLed.className = "dot" + (on ? " on" : "");
       el.titleChan.textContent = on ? ": " + s.name : "";
+      [...el.tickerTrack.children].forEach((button, i) => button.classList.toggle("active", on && i === index));
     }
 
     function playHls(url, gen, forceHlsJs) {

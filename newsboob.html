@@ -633,6 +633,31 @@
     .dot.warn { background: var(--mag); }
 
     .bezel-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .ticker {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(8, 9, 12, .35);
+      white-space: nowrap;
+    }
+    .ticker-track { display: inline-flex; align-items: center; animation: ticker-scroll 42s linear infinite; }
+    .ticker:hover .ticker-track, .ticker:focus-within .ticker-track { animation-play-state: paused; }
+    .ticker button {
+      appearance: none;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--dim);
+      font: 500 clamp(8px, .8vw, 10px)/1 var(--font);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+    .ticker button:hover, .ticker button:focus-visible { color: var(--cyan); background: rgba(61,255,210,.08); }
+    .ticker button.active { color: var(--mag); background: rgba(255,61,154,.1); }
+    @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-35%); } }
     .vol {
       display: flex;
       align-items: center;
@@ -736,6 +761,7 @@
               <span class="dot" id="pwrLed"></span>
               <span id="srcLabel">off</span>
             </div>
+            <div class="ticker" id="ticker" aria-label="Channels"><div class="ticker-track" id="tickerTrack"></div></div>
             <div class="bezel-controls">
               <label class="vol">Vol
                 <input id="vol" type="range" min="0" max="100" value="80" />
