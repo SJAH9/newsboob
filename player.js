@@ -222,6 +222,11 @@
       tile.type = "button";
       tile.className = "preview";
       tile.setAttribute("aria-label", "Monitor " + station.name);
+      tile.title = station.name;
+      const hoverLabel = document.createElement("span");
+      hoverLabel.className = "hover-label";
+      hoverLabel.textContent = station.name;
+      tile.appendChild(hoverLabel);
       const tag = document.createElement("span");
       tag.className = "tag";
       tag.textContent = station.name;

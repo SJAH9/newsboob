@@ -499,6 +499,28 @@
       background: #000;
     }
     .preview:hover video { border-color: var(--cyan); }
+    .preview .hover-label {
+      position: absolute;
+      inset: 0 0 auto;
+      aspect-ratio: 16 / 9;
+      height: auto;
+      display: grid;
+      place-items: center;
+      padding: 6px;
+      background: rgba(0, 0, 0, .78);
+      color: #fff;
+      font-size: clamp(10px, 1.15vw, 14px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-align: center;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .16s ease;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .preview:hover .hover-label,
+    .preview:focus-visible .hover-label { opacity: 1; }
     .preview .tag {
       flex: 0 0 auto;
       font-size: clamp(8px, 0.8vw, 10px);
