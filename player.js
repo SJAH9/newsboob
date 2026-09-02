@@ -341,6 +341,7 @@
 
     function playHls(url, gen, forceHlsJs) {
       return new Promise((resolve, reject) => {
+        stopHls();
         stopYt();
         hideOffAir();
         el.video.style.display = "block";
