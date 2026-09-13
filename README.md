@@ -6,7 +6,19 @@ A standalone world-news tuner: one player, one dial.
 
 Open `newsboob.html` in a browser, or use the live URL. No account. No extra chrome ads.
 
-The repository file is the standalone presentation. The website’s `/newsboob/` page is the embedded presentation. Both load the same local `player.js` core and local HLS engine; only the site navigation wrapper differs. Neither presentation uses an iframe.
+The repository file is the standalone presentation. The website’s `/newsboob/` page is the integrated presentation. Both load the same local `player.js` core and local HLS engine; neither presentation uses an iframe.
+
+## Current interface
+
+The tuner opens on France 24 and keeps the center player visible before playback and on compact screens. Its current interface includes:
+
+- a collapsible channel drawer with a fixed two-column live-monitor grid;
+- previous, next, scan, reload, mute, volume, and full-frame fullscreen controls;
+- a continuously moving, clickable channel ticker with active-station highlighting;
+- complete keyboard navigation and a 30-second scan countdown; and
+- responsive sizing that preserves the player on short and narrow displays.
+
+The live-site presentation adds Sid J.A. Hubbard navigation and theme controls, a NEWSBOOB wordmark linked to this repository, an About page, and site-footer attribution. Those website elements intentionally remain outside the portable standalone file.
 
 ## Stations
 
