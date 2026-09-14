@@ -252,10 +252,8 @@ Confirm that the first request returns a successful status and an HLS content ty
 
 ## Existing public channels
 
-The repository includes direct HLS entries for a set of public broadcasters. Their stream addresses are controlled by those broadcasters and can change without notice. Each channel's `site` field provides a recovery link when a direct manifest is unavailable.
-
-Only publish streams you are authorized to redistribute. NewsBoob supplies a player interface; ownership and licensing of the video remain with the stream operator and original rights holders.
+The repository includes direct HLS entries published by international broadcasters. HLS is an interoperable delivery format: NewsBoob requests each manifest and its segments directly from the configured source rather than copying, storing, or retransmitting the broadcast. Each channel's `site` field preserves a direct connection to the source and provides a recovery path when its manifest changes or becomes unavailable.
 
 ## License
 
-Personal / research use of this viewer interface. Streamed video remains the property of each broadcaster or host.
+Personal / research use of the NewsBoob viewer interface. Streams are fetched directly from their configured sources.
