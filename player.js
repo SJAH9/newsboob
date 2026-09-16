@@ -196,7 +196,7 @@
     }
 
     function captionTracks() {
-      return Array.from(el.video.textTracks || []);
+      return Array.from(el.video.textTracks || []).filter((track) => track.kind === "captions" || track.kind === "subtitles");
     }
 
     function captionName(track, i) {
@@ -257,7 +257,16 @@
       if (hls) {
         hls.subtitleDisplay = captionSelection >= 0;
         if (captionSelection < 0) hls.subtitleTrack = -1;
-        else if (captionSelection < hls.subtitleTracks.length) hls.subtitleTrack = captionSelection;
+        else {
+          const selected = tracks[captionSelection];
+          const selectedLanguage = (selected.language || "").toLowerCase();
+          const selectedLabel = (selected.label || "").toLowerCase();
+          const subtitleIndex = hls.subtitleTracks.findIndex((track) =>
+            (selectedLanguage && (track.lang || "").toLowerCase() === selectedLanguage) ||
+            (selectedLabel && (track.name || "").toLowerCase() === selectedLabel)
+          );
+          if (subtitleIndex >= 0) hls.subtitleTrack = subtitleIndex;
+        }
       }
       updateCaptionControl();
     }
