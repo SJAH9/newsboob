@@ -22,7 +22,7 @@ The player includes:
 - previous, next, scan, reload, mute, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
 - a live viewer-local date and 24-hour time followed by the channel source's local weekday and 24-hour time;
-- keyboard navigation and a Scan countdown to its 50-second maximum dwell; and
+- keyboard navigation and four Scan choices: AUTO, :30, :60, or a custom number of seconds; and
 - responsive sizing that keeps the main player visible on short and narrow displays.
 
 The sidhubbard.com presentation adds the Sid J.A. Hubbard site navigation, theme controls, an About page, and site-footer attribution. Those website elements remain outside the portable standalone files.
@@ -64,11 +64,11 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 | `C` | Open or close the channel selector |
 | `F` | Enter or leave framed fullscreen |
 | `R` | Reload the current stream |
-| `S` | Start or stop visual-transition scanning |
+| `S` | Start or stop the selected Scan mode |
 
 The **Full** control takes the complete NewsBoob set fullscreen, retaining its player bezel, source status, controls, and channel ticker. It changes to **Exit** while fullscreen is active.
 
-Scan mode observes only the playing video's tiny, downscaled frames. After a minimum 25-second dwell, it switches on a strong visual scene change; if no change is visible, it switches at 50 seconds. A stream that blocks canvas inspection falls back to the same 50-second limit. It does not inspect audio or understand speech, and it does not change the stream-loading path.
+**AUTO** observes only the playing video's tiny, downscaled frames. It shows `[0]` until the first strong visual scene change, waits for the picture to stabilize, then shows `[1]` until the next strong change switches channels. AUTO has no countdown or time limit. A stream that blocks canvas inspection shows `NO FRAME`; use a timed mode for that stream. **:30** and **:60** retain a visible countdown and switch after 30 or 60 seconds of playback. Enter a whole number from 5 to 3600 in the custom field to set an interval in seconds; it also has a countdown. Click an active button again or press `S` to stop Scan. Scan does not inspect audio or understand speech, and it does not change the stream-loading path.
 
 ## Host NewsBoob on your website
 

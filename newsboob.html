@@ -240,6 +240,19 @@
     }
     .scan-controls { display: flex; align-items: center; gap: 4px; }
     .scan-controls .bezel-btn { padding: 5px 7px; }
+    .scan-custom {
+      width: 48px;
+      padding: 5px 3px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      color: var(--dim);
+      font: 500 10px/1 var(--font);
+      text-align: center;
+    }
+    .scan-custom.active { border-color: var(--cyan); color: var(--cyan); }
+    .scan-custom::placeholder { color: var(--dim); opacity: 1; }
+    .scan-status { min-width: 49px; color: var(--cyan); text-align: center; font: 500 9px/1 var(--font); letter-spacing: .04em; }
 
     .body {
       flex: 1 1 auto;
@@ -679,6 +692,7 @@
     @media (max-width: 860px) {
       .set { --dial: clamp(120px, 42vmin, 220px); }
       .plate { flex-wrap: wrap; }
+      .model { flex-wrap: wrap; }
       .body {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(0, 1fr) auto;
@@ -709,7 +723,7 @@
     <div class="set">
       <header class="plate">
         <div class="wordmark">NEWS<i>BOOB</i><span class="datetime" id="titleDate"></span><span class="chan" id="titleChan"></span></div>
-        <div class="model"><span>International News</span><div class="scan-controls"><button class="bezel-btn" id="scanPrevBtn" type="button" aria-label="Previous channel">&lt;</button><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false">Scan</button><button class="bezel-btn" id="scanNextBtn" type="button" aria-label="Next channel">&gt;</button></div></div>
+        <div class="model"><span>International News</span><div class="scan-controls" aria-label="Scan modes"><button class="bezel-btn" id="scanPrevBtn" type="button" aria-label="Previous channel">&lt;</button><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false" title="Switch after two distinct strong visual changes">AUTO</button><button class="bezel-btn scan-btn" id="scan30Btn" type="button" aria-pressed="false" title="Switch every 30 seconds">:30</button><button class="bezel-btn scan-btn" id="scan60Btn" type="button" aria-pressed="false" title="Switch every 60 seconds">:60</button><input class="scan-custom" id="scanCustom" type="number" min="5" max="3600" step="1" inputmode="numeric" placeholder="SEC" aria-label="Custom scan interval in seconds" title="Enter 5–3600 seconds, then press Enter" /><span class="scan-status" id="scanStatus" aria-hidden="true"></span><button class="bezel-btn" id="scanNextBtn" type="button" aria-label="Next channel">&gt;</button></div></div>
       </header>
 
       <div class="body" id="layout">
@@ -751,7 +765,7 @@
               <div>
                 <h2>NEWSBOOB</h2>
                 <button class="power" id="power" type="button">START</button>
-                <p>Newsboob is a news player I made for myself that does not track you, serve internet ads, or show “skip button”–style video ads. It is a player for international news in the style of the old-school internet.<br><br>Scan mode looks for a visual transition after 25 seconds and switches by 50 seconds if it cannot detect one. It cannot tell when a sentence ends. Activate it with the Scan button in the upper-right corner or press “S,” or click START and change the channel with the right or left arrow. Up and down changes volume; Spacebar mutes. “C” closes or opens the channel drawer, “F” toggles full screen, and “R” reloads the video if it gets stuck.<br><br>This service is free, legal, and not evil. I made it to escape the bubble with another bubble. I’m sharing so I won’t be the only one boobing out in front of it.<br><br>— Sid</p>
+                <p>Newsboob is a news player I made for myself that does not track you, serve internet ads, or show “skip button”–style video ads. It is a player for international news in the style of the old-school internet.<br><br>AUTO shows [0], then [1] after the first strong visual scene change, and switches channels after the next distinct change. Timed modes :30 and :60, or a custom number of seconds, keep a countdown. If a feed blocks frame inspection, AUTO shows NO FRAME; choose a timed mode instead. Click an active mode again to stop scanning, or press “S” to toggle it. Change channels with the right or left arrow. Up and down changes volume; Spacebar mutes. “C” closes or opens the channel drawer, “F” toggles full screen, and “R” reloads the video if it gets stuck.<br><br>This service is free, legal, and not evil. I made it to escape the bubble with another bubble. I’m sharing so I won’t be the only one boobing out in front of it.<br><br>— Sid</p>
               </div>
             </div>
             <div class="veil hidden" id="offair">
@@ -781,6 +795,6 @@
       </div>
     </div>
   </div>
-  <script src="player.js?v=20260916-1"></script>
+  <script src="player.js?v=20260916-2"></script>
 </body>
 </html>

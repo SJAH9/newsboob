@@ -120,6 +120,10 @@
       panelBtn: document.getElementById("panelBtn"),
       reloadBtn: document.getElementById("reloadBtn"),
       scanBtn: document.getElementById("scanBtn"),
+      scan30Btn: document.getElementById("scan30Btn"),
+      scan60Btn: document.getElementById("scan60Btn"),
+      scanCustom: document.getElementById("scanCustom"),
+      scanStatus: document.getElementById("scanStatus"),
       scanPrevBtn: document.getElementById("scanPrevBtn"),
       scanNextBtn: document.getElementById("scanNextBtn"),
       layout: document.getElementById("layout"),
@@ -142,9 +146,13 @@
     let dragIndex = index;
     let scanTimer = null;
     let scanMode = false;
+    let scanType = "auto";
+    let scanCustomSeconds = 45;
     let scanDeadline = 0;
-    let scanEarliest = 0;
     let scanSwitching = false;
+    let scanCutCount = 0;
+    let scanCutArmed = true;
+    let scanStableFrames = 0;
     let scanCanvas = null;
     let scanContext = null;
     let scanPreviousFrame = null;
@@ -554,9 +562,10 @@
     }
 
     function resetScanWindow() {
-      const now = Date.now();
-      scanEarliest = now + 25000;
-      scanDeadline = now + 50000;
+      scanDeadline = Date.now() + scanIntervalSeconds() * 1000;
+      scanCutCount = 0;
+      scanCutArmed = true;
+      scanStableFrames = 0;
       scanPreviousFrame = null;
       scanFrameUnavailable = false;
       scanCanvas = null;
@@ -580,7 +589,7 @@
     function scanForVisualCut() {
       const video = el.video;
       if (scanFrameUnavailable || document.hidden || video.style.display === "none" ||
-          video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return false;
+          video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return null;
       try {
         if (!scanCanvas) {
           scanCanvas = document.createElement("canvas");
@@ -598,15 +607,49 @@
         // Cross-origin streams may block frame inspection; timed scanning remains available.
         scanFrameUnavailable = true;
         scanPreviousFrame = null;
-        return false;
+        return null;
+      }
+    }
+
+    function scanIntervalSeconds() {
+      return scanType === "30" ? 30 : scanType === "60" ? 60 : scanCustomSeconds;
+    }
+
+    function updateScanControls() {
+      for (const [type, button] of [["auto", el.scanBtn], ["30", el.scan30Btn], ["60", el.scan60Btn]]) {
+        const active = scanMode && scanType === type;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      }
+      el.scanCustom.classList.toggle("active", scanMode && scanType === "custom");
+      el.scanCustom.setAttribute("aria-label", "Custom scan interval in seconds" + (scanMode && scanType === "custom" ? ", active" : ""));
+      if (!scanMode) {
+        el.scanStatus.textContent = "";
+      } else if (scanType === "auto") {
+        el.scanStatus.textContent = scanFrameUnavailable ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
+      } else {
+        const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
+        el.scanStatus.textContent = String(Math.floor(remaining / 60)).padStart(2, "0") + ":" + String(remaining % 60).padStart(2, "0");
       }
     }
 
     function scanTick() {
       if (!scanMode || !on || scanSwitching) return;
-      const now = Date.now();
-      const cut = scanForVisualCut();
-      if (now < scanDeadline && (now < scanEarliest || !cut)) return;
+      if (scanType === "auto" && el.offair.classList.contains("hidden")) {
+        const cut = scanForVisualCut();
+        if (cut === true && scanCutArmed) {
+          scanCutCount += 1;
+          scanCutArmed = false;
+          scanStableFrames = 0;
+        } else if (cut === false && !scanCutArmed) {
+          scanStableFrames += 1;
+          if (scanStableFrames >= 2) scanCutArmed = true;
+        }
+        updateScanControls();
+        if (scanCutCount < 2) return;
+      } else if (Date.now() < scanDeadline) {
+        return;
+      }
       scanSwitching = true;
       queueGo(index + 1).finally(() => { scanSwitching = false; });
     }
@@ -617,19 +660,26 @@
         clearInterval(scanTimer);
         scanTimer = null;
       }
-      el.scanBtn.classList.toggle("active", enabled);
-      el.scanBtn.setAttribute("aria-pressed", String(enabled));
-      el.scanBtn.textContent = enabled ? "Scan on" : "Scan";
-      el.scanBtn.title = enabled ? "Scan for a visual transition after 25 seconds (50-second limit)" : "Scan at visual transitions, with a 50-second limit";
       if (!enabled) {
         scanCanvas = null;
         scanContext = null;
         scanPreviousFrame = null;
+        updateScanControls();
         return;
       }
       resetScanWindow();
+      updateScanControls();
       if (!on) go(index);
-      scanTimer = setInterval(scanTick, 500);
+      scanTimer = setInterval(scanTick, 250);
+    }
+
+    function chooseScanMode(type) {
+      if (scanMode && scanType === type) {
+        setScanMode(false);
+      } else {
+        scanType = type;
+        setScanMode(true);
+      }
     }
 
     function setPanel(open) {
@@ -717,7 +767,18 @@
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
-    el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
+    el.scanBtn.addEventListener("click", () => chooseScanMode("auto"));
+    el.scan30Btn.addEventListener("click", () => chooseScanMode("30"));
+    el.scan60Btn.addEventListener("click", () => chooseScanMode("60"));
+    function chooseCustomScan() {
+      const seconds = Number(el.scanCustom.value);
+      if (!Number.isInteger(seconds) || seconds < 5 || seconds > 3600) return;
+      scanCustomSeconds = seconds;
+      scanType = "custom";
+      setScanMode(true);
+    }
+    el.scanCustom.addEventListener("change", chooseCustomScan);
+    el.scanCustom.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); chooseCustomScan(); el.scanCustom.blur(); } });
     el.scanPrevBtn.addEventListener("click", () => go(index - 1));
     el.scanNextBtn.addEventListener("click", () => go(index + 1));
     el.video.addEventListener("pointerdown", () => {
@@ -807,12 +868,7 @@
       const pad = (n) => String(n).padStart(2, "0");
       el.clock.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
       updateTitleClock(d);
-      if (scanMode) {
-        const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        el.scanBtn.textContent = "SCAN BY " + pad(mins) + ":" + pad(secs);
-      }
+      if (scanMode) updateScanControls();
     }
     tickClock();
     setInterval(tickClock, 1000);
