@@ -246,9 +246,14 @@
 
       const available = options.length > 0;
       const active = captionsEnabled && available;
-      if (hls) {
-        hls.subtitleDisplay = active;
-        hls.subtitleTrack = active && options[captionSelection].type === "hls" ? options[captionSelection].hlsIndex : -1;
+      if (hls && active) {
+        hls.subtitleDisplay = true;
+        if (options[captionSelection].type === "hls" && hls.subtitleTrack !== options[captionSelection].hlsIndex) {
+          hls.subtitleTrack = options[captionSelection].hlsIndex;
+        }
+      } else if (hls && hls.subtitleTrack >= 0) {
+        hls.subtitleDisplay = false;
+        hls.subtitleTrack = -1;
       }
       if (active && options[captionSelection].browserTrack) {
         options[captionSelection].browserTrack.mode = "showing";
