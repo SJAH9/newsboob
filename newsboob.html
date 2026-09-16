@@ -557,7 +557,6 @@
       height: 100%;
     }
     #hlsVideo { background: #000; object-fit: contain; }
-    #hlsVideo::cue { color: #fff; background: rgba(0, 0, 0, .82); font-family: var(--font); }
     #yt { border: 0; }
     .scan {
       pointer-events: none;
@@ -636,7 +635,6 @@
     .dot.warn { background: var(--mag); }
 
     .bezel-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .cc-btn.active { color: var(--cyan); border-color: var(--cyan); background: rgba(61,255,210,.08); }
     .ticker {
       flex: 1 1 auto;
       max-width: none;
@@ -775,7 +773,6 @@
                 <input id="vol" type="range" min="0" max="100" value="80" />
               </label>
               <button class="bezel-btn" id="muteBtn" type="button">Mute</button>
-              <button class="bezel-btn cc-btn active" id="ccBtn" type="button" aria-pressed="true" aria-label="Automatic captions on; waiting for a caption track" title="Captions will appear automatically when available">CC AUTO</button>
               <button class="bezel-btn" id="reloadBtn" type="button">Reload</button>
               <button class="bezel-btn" id="fsBtn" type="button">Full</button>
             </div>
@@ -784,6 +781,6 @@
       </div>
     </div>
   </div>
-  <script src="player.js?v=20260915-8"></script>
+  <script src="player.js?v=20260915-9"></script>
 </body>
 </html>

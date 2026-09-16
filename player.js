@@ -1,6 +1,6 @@
     const STATIONS = [
       {
-        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany", timeZone: "Europe/Berlin", forceHlsJs: true,
+        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany", timeZone: "Europe/Berlin",
         hls: [
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8"
@@ -38,7 +38,7 @@
         site: "https://www.channelnewsasia.com/watch"
       },
       {
-        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia", timeZone: "Australia/Sydney", forceHlsJs: true,
+        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia", timeZone: "Australia/Sydney",
         hls: [
           "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
           "https://c.mjh.nz/abc-news.m3u8"
@@ -54,14 +54,14 @@
         site: "https://news.sky.com/watch-live"
       },
       {
-        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
+        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://www.bloomberg.com/media-manifest/streams/us.m3u8"
         ],
         site: "https://www.bloomberg.com/live"
       },
       {
-        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
+        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://news20e7hhcb.airspace-cdn.cbsivideo.com/index.m3u8",
           "https://cbsnews.akamaized.net/hls/live/2020607/cbsnlineup_8/master.m3u8"
@@ -69,7 +69,7 @@
         site: "https://www.cbsnews.com/live/"
       },
       {
-        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
+        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
         ],
@@ -114,7 +114,6 @@
       ytHost: document.getElementById("yt"),
       vol: document.getElementById("vol"),
       muteBtn: document.getElementById("muteBtn"),
-      ccBtn: document.getElementById("ccBtn"),
       fsBtn: document.getElementById("fsBtn"),
       prevBtn: document.getElementById("prevBtn"),
       nextBtn: document.getElementById("nextBtn"),
@@ -136,9 +135,6 @@
     let locked = -1;
     let token = 0;
     let hls = null;
-    let captionSelection = 0;
-    let captionsEnabled = true;
-    let captionRefreshTimers = [];
     const previewPlayers = new Map();
     let muted = false;
     let panelOpen = localStorage.getItem("newsboob.panel") !== "0";
@@ -187,7 +183,6 @@
     }
 
     function stopHls() {
-      resetCaptions();
       if (hls) { hls.destroy(); hls = null; }
       el.video.onloadedmetadata = null;
       el.video.onerror = null;
@@ -195,113 +190,6 @@
       el.video.removeAttribute("src");
       el.video.load();
       el.video.style.display = "none";
-    }
-
-    function captionTracks() {
-      return Array.from(el.video.textTracks || []).filter((track) => track.kind === "captions" || track.kind === "subtitles");
-    }
-
-    function captionsMatch(browserTrack, hlsTrack) {
-      const browserLanguage = (browserTrack.language || "").toLowerCase();
-      const browserLabel = (browserTrack.label || "").toLowerCase();
-      const hlsLanguage = (hlsTrack.lang || "").toLowerCase();
-      const hlsLabel = (hlsTrack.name || "").toLowerCase();
-      return (browserLanguage && hlsLanguage && browserLanguage === hlsLanguage) ||
-        (browserLabel && hlsLabel && browserLabel === hlsLabel);
-    }
-
-    function captionOptions() {
-      const browserTracks = captionTracks();
-      const options = [];
-      const subtitleTracks = hls && Array.isArray(hls.subtitleTracks) ? hls.subtitleTracks : [];
-      subtitleTracks.forEach((track, hlsIndex) => {
-        options.push({
-          type: "hls",
-          hlsIndex,
-          language: track.lang || "",
-          label: track.name || "",
-          browserTrack: browserTracks.find((browserTrack) => captionsMatch(browserTrack, track)) || null
-        });
-      });
-      browserTracks.forEach((browserTrack) => {
-        if (options.some((option) => option.browserTrack === browserTrack)) return;
-        options.push({
-          type: "browser",
-          language: browserTrack.language || "",
-          label: browserTrack.label || "",
-          browserTrack
-        });
-      });
-      return options;
-    }
-
-    function captionName(option, i) {
-      return (option.language || option.label || ("CC" + (i + 1))).toUpperCase();
-    }
-
-    function updateCaptionControl() {
-      const options = captionOptions();
-      if (captionSelection >= options.length) captionSelection = 0;
-      captionTracks().forEach((track) => { track.mode = "disabled"; });
-
-      const available = options.length > 0;
-      const active = captionsEnabled && available;
-      if (hls && active) {
-        hls.subtitleDisplay = true;
-        if (options[captionSelection].type === "hls" && hls.subtitleTrack !== options[captionSelection].hlsIndex) {
-          hls.subtitleTrack = options[captionSelection].hlsIndex;
-        }
-      } else if (hls && hls.subtitleTrack >= 0) {
-        hls.subtitleDisplay = false;
-        hls.subtitleTrack = -1;
-      }
-      if (active && options[captionSelection].browserTrack) {
-        options[captionSelection].browserTrack.mode = "showing";
-      }
-
-      el.ccBtn.disabled = false;
-      el.ccBtn.classList.toggle("active", captionsEnabled);
-      el.ccBtn.setAttribute("aria-pressed", String(captionsEnabled));
-      if (!captionsEnabled) {
-        el.ccBtn.textContent = "CC OFF";
-        el.ccBtn.setAttribute("aria-label", "Turn automatic captions on");
-        el.ccBtn.title = "Captions off; turn automatic captions on";
-      } else if (!available) {
-        el.ccBtn.textContent = "CC AUTO";
-        el.ccBtn.setAttribute("aria-label", "Automatic captions on; waiting for a caption track");
-        el.ccBtn.title = "Captions will appear automatically when available";
-      } else {
-        const name = captionName(options[captionSelection], captionSelection);
-        el.ccBtn.textContent = "CC " + name;
-        el.ccBtn.setAttribute("aria-label", "Captions " + name + " on; turn captions off");
-        el.ccBtn.title = "Captions on: " + name;
-      }
-    }
-
-    function scheduleCaptionRefresh() {
-      captionRefreshTimers.forEach(clearTimeout);
-      captionRefreshTimers = [0, 250, 1000, 2500].map((delay) => setTimeout(updateCaptionControl, delay));
-    }
-
-    function resetCaptions() {
-      captionRefreshTimers.forEach(clearTimeout);
-      captionRefreshTimers = [];
-      captionSelection = 0;
-      captionTracks().forEach((track) => { track.mode = "disabled"; });
-      if (el.ccBtn) {
-        el.ccBtn.disabled = false;
-        el.ccBtn.classList.toggle("active", captionsEnabled);
-        el.ccBtn.setAttribute("aria-pressed", String(captionsEnabled));
-        el.ccBtn.setAttribute("aria-label", captionsEnabled ? "Automatic captions on; waiting for a caption track" : "Turn automatic captions on");
-        el.ccBtn.textContent = captionsEnabled ? "CC AUTO" : "CC OFF";
-        el.ccBtn.title = captionsEnabled ? "Captions will appear automatically when available" : "Captions off; turn automatic captions on";
-      }
-    }
-
-    function cycleCaptions() {
-      captionsEnabled = !captionsEnabled;
-      captionSelection = 0;
-      updateCaptionControl();
     }
 
     function stopYt() {
@@ -503,7 +391,6 @@
           settled = true;
           clearTimeout(timer);
           if (gen !== token) return;
-          scheduleCaptionRefresh();
           startPlayback();
         };
         const timer = setTimeout(() => fail(new Error("timeout")), 14000);
@@ -544,11 +431,8 @@
             hls.autoLevelCapping = -1;
             hls.startLevel = best;
             hls.nextLevel = best;
-            scheduleCaptionRefresh();
             ok();
           });
-          hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, scheduleCaptionRefresh);
-          hls.on(Hls.Events.NON_NATIVE_TEXT_TRACKS_FOUND, scheduleCaptionRefresh);
           hls.on(Hls.Events.ERROR, (_, data) => {
             if (!data.fatal) {
               if (data.details === "bufferStalledError") hls.startLoad();
@@ -762,7 +646,6 @@
     el.nextBtn.addEventListener("click", () => go(index + 1));
     el.vol.addEventListener("input", applyVolume);
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
-    el.ccBtn.addEventListener("click", cycleCaptions);
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
     el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
@@ -771,11 +654,6 @@
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
-    if (el.video.textTracks && el.video.textTracks.addEventListener) {
-      el.video.textTracks.addEventListener("addtrack", scheduleCaptionRefresh);
-      el.video.textTracks.addEventListener("removetrack", scheduleCaptionRefresh);
-      el.video.textTracks.addEventListener("change", updateCaptionControl);
-    }
     el.fsBtn.addEventListener("click", () => {
       const frame = document.querySelector(".set");
       const active = document.fullscreenElement || document.webkitFullscreenElement;
@@ -817,7 +695,6 @@
       if (e.key === "ArrowUp") { e.preventDefault(); el.vol.value = String(Math.min(100, Number(el.vol.value) + 10)); applyVolume(); }
       if (e.key === "ArrowDown") { e.preventDefault(); el.vol.value = String(Math.max(0, Number(el.vol.value) - 10)); applyVolume(); }
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
-      if (e.key.toLowerCase() === "v") { e.preventDefault(); cycleCaptions(); }
       if (e.key.toLowerCase() === "c") { e.preventDefault(); setPanel(!panelOpen); }
       if (e.key.toLowerCase() === "f") { e.preventDefault(); el.fsBtn.click(); }
       if (e.key.toLowerCase() === "r") { e.preventDefault(); reloadStream(); }

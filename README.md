@@ -19,7 +19,7 @@ Keep all three files in the same directory unless you also update the two script
 The player includes:
 
 - a nation-based channel selector with a fixed two-column live-monitor grid;
-- previous, next, scan, reload, mute, captions, volume, and framed-fullscreen controls;
+- previous, next, scan, reload, mute, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
 - a live viewer-local date and 24-hour time followed by the channel source's local weekday and 24-hour time;
 - keyboard navigation and a 30-second scan countdown; and
@@ -61,15 +61,12 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 | Up / Down | Raise or lower volume |
 | `1`–`9`, `0` | Select the corresponding channel |
 | Space or `M` | Toggle mute |
-| `V` | Toggle automatic captions on or off |
 | `C` | Open or close the channel selector |
 | `F` | Enter or leave framed fullscreen |
 | `R` | Reload the current stream |
 | `S` | Start or stop 30-second channel scanning |
 
 The **Full** control takes the complete NewsBoob set fullscreen, retaining its player bezel, source status, controls, and channel ticker. It changes to **Exit** while fullscreen is active.
-
-The **CC** control is always available. Captions are automatic by default: NewsBoob displays the first caption or subtitle track whenever the selected stream supplies one. Select **CC** (or press `V`) to switch captions off, and select it again to restore automatic captions. NewsBoob reads tracks already carried by the stream and does not send audio to a captioning service.
 
 ## Host NewsBoob on your website
 
