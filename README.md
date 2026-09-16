@@ -22,7 +22,7 @@ The player includes:
 - previous, next, scan, reload, mute, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
 - a live viewer-local date and 24-hour time followed by the channel source's local weekday and 24-hour time;
-- keyboard navigation and a 30-second scan countdown; and
+- keyboard navigation and a Scan countdown to its 50-second maximum dwell; and
 - responsive sizing that keeps the main player visible on short and narrow displays.
 
 The sidhubbard.com presentation adds the Sid J.A. Hubbard site navigation, theme controls, an About page, and site-footer attribution. Those website elements remain outside the portable standalone files.
@@ -64,9 +64,11 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 | `C` | Open or close the channel selector |
 | `F` | Enter or leave framed fullscreen |
 | `R` | Reload the current stream |
-| `S` | Start or stop 30-second channel scanning |
+| `S` | Start or stop visual-transition scanning |
 
 The **Full** control takes the complete NewsBoob set fullscreen, retaining its player bezel, source status, controls, and channel ticker. It changes to **Exit** while fullscreen is active.
+
+Scan mode observes only the playing video's tiny, downscaled frames. After a minimum 25-second dwell, it switches on a strong visual scene change; if no change is visible, it switches at 50 seconds. A stream that blocks canvas inspection falls back to the same 50-second limit. It does not inspect audio or understand speech, and it does not change the stream-loading path.
 
 ## Host NewsBoob on your website
 

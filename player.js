@@ -143,6 +143,12 @@
     let scanTimer = null;
     let scanMode = false;
     let scanDeadline = 0;
+    let scanEarliest = 0;
+    let scanSwitching = false;
+    let scanCanvas = null;
+    let scanContext = null;
+    let scanPreviousFrame = null;
+    let scanFrameUnavailable = false;
     const STEP = 360 / STATIONS.length;
     let needle = index * STEP;
 
@@ -480,6 +486,7 @@
     function showOffAir(station, detail) {
       stopHls();
       stopYt();
+      if (scanMode) scanDeadline = Math.min(scanDeadline, Date.now() + 5000);
       el.offair.classList.remove("hidden");
       el.offTitle.textContent = face(station);
       el.offCopy.textContent = detail ||
@@ -493,6 +500,7 @@
 
     async function go(i) {
       i = (i + STATIONS.length) % STATIONS.length;
+      if (scanMode) resetScanWindow();
       index = i;
       localStorage.setItem("newsboob.station", String(index));
       setPointer(index);
@@ -523,6 +531,7 @@
           await playNative(s, gen);
           if (gen !== token) return;
           setStatus("source stream", face(s));
+          if (scanMode) resetScanWindow();
           applyVolume();
           return;
         } catch (_) {
@@ -544,6 +553,64 @@
       if (panelOpen) syncPreviews();
     }
 
+    function resetScanWindow() {
+      const now = Date.now();
+      scanEarliest = now + 25000;
+      scanDeadline = now + 50000;
+      scanPreviousFrame = null;
+      scanFrameUnavailable = false;
+      scanCanvas = null;
+      scanContext = null;
+    }
+
+    function scanFrameIsCut(previous, current) {
+      let totalDifference = 0;
+      let changedPixels = 0;
+      const pixels = current.length / 4;
+      for (let i = 0; i < current.length; i += 4) {
+        const difference = (Math.abs(current[i] - previous[i]) +
+          Math.abs(current[i + 1] - previous[i + 1]) +
+          Math.abs(current[i + 2] - previous[i + 2])) / 3;
+        totalDifference += difference;
+        if (difference > 50) changedPixels += 1;
+      }
+      return totalDifference / pixels > 40 && changedPixels / pixels > 0.35;
+    }
+
+    function scanForVisualCut() {
+      const video = el.video;
+      if (scanFrameUnavailable || document.hidden || video.style.display === "none" ||
+          video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return false;
+      try {
+        if (!scanCanvas) {
+          scanCanvas = document.createElement("canvas");
+          scanCanvas.width = 24;
+          scanCanvas.height = 14;
+          scanContext = scanCanvas.getContext("2d", { willReadFrequently: true });
+          if (!scanContext) throw new Error("Canvas unavailable");
+        }
+        scanContext.drawImage(video, 0, 0, 24, 14);
+        const current = scanContext.getImageData(0, 0, 24, 14).data;
+        const cut = scanPreviousFrame && scanFrameIsCut(scanPreviousFrame, current);
+        scanPreviousFrame = new Uint8Array(current);
+        return !!cut;
+      } catch (_) {
+        // Cross-origin streams may block frame inspection; timed scanning remains available.
+        scanFrameUnavailable = true;
+        scanPreviousFrame = null;
+        return false;
+      }
+    }
+
+    function scanTick() {
+      if (!scanMode || !on || scanSwitching) return;
+      const now = Date.now();
+      const cut = scanForVisualCut();
+      if (now < scanDeadline && (now < scanEarliest || !cut)) return;
+      scanSwitching = true;
+      queueGo(index + 1).finally(() => { scanSwitching = false; });
+    }
+
     function setScanMode(enabled) {
       scanMode = enabled;
       if (scanTimer) {
@@ -553,14 +620,16 @@
       el.scanBtn.classList.toggle("active", enabled);
       el.scanBtn.setAttribute("aria-pressed", String(enabled));
       el.scanBtn.textContent = enabled ? "Scan on" : "Scan";
-      el.scanBtn.title = enabled ? "Stop automatic channel scanning" : "Scan channels every 30 seconds";
-      if (!enabled) return;
-      scanDeadline = Date.now() + 30000;
+      el.scanBtn.title = enabled ? "Scan for a visual transition after 25 seconds (50-second limit)" : "Scan at visual transitions, with a 50-second limit";
+      if (!enabled) {
+        scanCanvas = null;
+        scanContext = null;
+        scanPreviousFrame = null;
+        return;
+      }
+      resetScanWindow();
       if (!on) go(index);
-      scanTimer = setInterval(() => {
-        if (scanMode && on) go(index + 1);
-        scanDeadline = Date.now() + 30000;
-      }, 30000);
+      scanTimer = setInterval(scanTick, 500);
     }
 
     function setPanel(open) {
@@ -649,8 +718,8 @@
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
     el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
-    el.scanPrevBtn.addEventListener("click", () => { if (scanMode) scanDeadline = Date.now() + 30000; go(index - 1); });
-    el.scanNextBtn.addEventListener("click", () => { if (scanMode) scanDeadline = Date.now() + 30000; go(index + 1); });
+    el.scanPrevBtn.addEventListener("click", () => go(index - 1));
+    el.scanNextBtn.addEventListener("click", () => go(index + 1));
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
@@ -742,7 +811,7 @@
         const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
-        el.scanBtn.textContent = "SCAN " + pad(mins) + ":" + pad(secs);
+        el.scanBtn.textContent = "SCAN BY " + pad(mins) + ":" + pad(secs);
       }
     }
     tickClock();
