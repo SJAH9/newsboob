@@ -1,6 +1,6 @@
     const STATIONS = [
       {
-        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany", timeZone: "Europe/Berlin",
+        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany", timeZone: "Europe/Berlin", forceHlsJs: true,
         hls: [
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8"
@@ -38,7 +38,7 @@
         site: "https://www.channelnewsasia.com/watch"
       },
       {
-        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia", timeZone: "Australia/Sydney",
+        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia", timeZone: "Australia/Sydney", forceHlsJs: true,
         hls: [
           "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
           "https://c.mjh.nz/abc-news.m3u8"
@@ -54,14 +54,14 @@
         site: "https://news.sky.com/watch-live"
       },
       {
-        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA", timeZone: "America/New_York",
+        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
         hls: [
           "https://www.bloomberg.com/media-manifest/streams/us.m3u8"
         ],
         site: "https://www.bloomberg.com/live"
       },
       {
-        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA", timeZone: "America/New_York",
+        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
         hls: [
           "https://news20e7hhcb.airspace-cdn.cbsivideo.com/index.m3u8",
           "https://cbsnews.akamaized.net/hls/live/2020607/cbsnlineup_8/master.m3u8"
@@ -69,7 +69,7 @@
         site: "https://www.cbsnews.com/live/"
       },
       {
-        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA", timeZone: "America/New_York",
+        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA", timeZone: "America/New_York", forceHlsJs: true,
         hls: [
           "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
         ],
