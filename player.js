@@ -837,15 +837,19 @@
       const pad = (n) => String(n).padStart(2, "0");
       const hour24 = d.getHours();
       const station = STATIONS[index];
+      let sourceDay;
       let sourceTime;
       try {
-        sourceTime = new Intl.DateTimeFormat("en-US", { timeZone: station.timeZone, hour: "numeric", minute: "2-digit", hour12: true }).format(d).replace(/\s/g, "");
+        const sourceParts = new Intl.DateTimeFormat("en-US", { timeZone: station.timeZone, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(d);
+        const sourcePart = (type) => sourceParts.find((part) => part.type === type)?.value || "";
+        sourceDay = sourcePart("weekday").toUpperCase();
+        sourceTime = sourcePart("hour") + ":" + sourcePart("minute");
       } catch (_) {
-        const hour12 = hour24 % 12 || 12;
-        sourceTime = hour12 + ":" + pad(d.getMinutes()) + (hour24 >= 12 ? "PM" : "AM");
+        sourceDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][d.getDay()];
+        sourceTime = pad(hour24) + ":" + pad(d.getMinutes());
       }
-      el.titleDate.textContent = d.getFullYear() + "." + (d.getMonth() + 1) + "." + d.getDate() + " " + pad(hour24) + ":" + pad(d.getMinutes()) + " ";
-      el.titleChan.textContent = ": " + sourceTime + " " + face(station);
+      el.titleDate.textContent = " " + d.getFullYear() + "/" + pad(d.getMonth() + 1) + "/" + pad(d.getDate()) + " " + pad(hour24) + ":" + pad(d.getMinutes()) + " LOCAL TIME ";
+      el.titleChan.textContent = sourceDay + " " + sourceTime + " " + face(station);
     }
 
     function tickClock() {

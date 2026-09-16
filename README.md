@@ -21,7 +21,7 @@ The player includes:
 - a nation-based channel selector with a fixed two-column live-monitor grid;
 - previous, next, scan, reload, mute, captions, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
-- a live local date and dual 24-hour/12-hour time display in the title;
+- a live viewer-local date and 24-hour time followed by the channel source's local weekday and 24-hour time;
 - keyboard navigation and a 30-second scan countdown; and
 - responsive sizing that keeps the main player visible on short and narrow displays.
 
