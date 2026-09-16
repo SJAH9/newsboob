@@ -21,6 +21,7 @@ The player includes:
 - a nation-based channel selector with a fixed two-column live-monitor grid;
 - previous, next, scan, reload, mute, captions, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
+- a live local date and dual 24-hour/12-hour time display in the title;
 - keyboard navigation and a 30-second scan countdown; and
 - responsive sizing that keeps the main player visible on short and narrow displays.
 
@@ -98,6 +99,7 @@ Each channel is an object in the `STATIONS` array at the top of `player.js`. Add
   label: "HOST",
   name: "Host Media",
   nation: "Host Media",
+  timeZone: "America/Los_Angeles",
   forceHlsJs: true,
   hls: [
     "https://your-site.example/live/index.m3u8"
@@ -114,6 +116,7 @@ The fields have the following purposes:
 | `label` | The compact callsign shown by space-constrained controls. |
 | `name` | The broadcaster or channel name retained as source metadata. |
 | `nation` | The nation-of-origin name shown on the dial, ticker, status display, and channel selector. |
+| `timeZone` | The source's IANA timezone, used for the source-local clock in the title. |
 | `hls` | One HLS manifest URL, or an ordered list of primary and fallback manifests. |
 | `site` | The page opened when the stream is unavailable. |
 | `forceHlsJs` | Uses the bundled HLS engine when supported. This is useful for consistent behavior with a host-managed stream. |
@@ -147,6 +150,7 @@ The equivalent portable channel entry is:
   label: "HOST",
   name: "Host Media",
   nation: "Host Media",
+  timeZone: "America/Los_Angeles",
   forceHlsJs: true,
   hls: [
     "https://sidhubbard.com/live/index.m3u8"

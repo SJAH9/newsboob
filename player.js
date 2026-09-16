@@ -1,6 +1,6 @@
     const STATIONS = [
       {
-        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany",
+        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany", timeZone: "Europe/Berlin",
         hls: [
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8"
@@ -8,7 +8,7 @@
         site: "https://www.dw.com/en/live-tv/channel-english"
       },
       {
-        id: "f24", label: "F24", name: "France 24", nation: "France",
+        id: "f24", label: "F24", name: "France 24", nation: "France", timeZone: "Europe/Paris",
         hls: [
           "https://live.france24.com/hls/live/2037218-b/F24_EN_HI_HLS/master_5000.m3u8",
           "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8"
@@ -16,14 +16,14 @@
         site: "https://www.france24.com/en/live"
       },
       {
-        id: "eur", label: "EUR", name: "Euronews", nation: "Europe",
+        id: "eur", label: "EUR", name: "Euronews", nation: "Europe", timeZone: "Europe/Paris",
         hls: [
           "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8"
         ],
         site: "https://www.euronews.com/live"
       },
       {
-        id: "rt", label: "RT", name: "RT News", nation: "Russia",
+        id: "rt", label: "RT", name: "RT News", nation: "Russia", timeZone: "Europe/Moscow",
         hls: [
           "https://rt-glb.rttv.com/dvr/rtnews/playlist.m3u8",
           "https://rt-glb.rttv.com/live/rtnews/playlist.m3u8"
@@ -31,14 +31,14 @@
         site: "https://www.rt.com/"
       },
       {
-        id: "cna", label: "CNA", name: "CNA Singapore", nation: "Singapore",
+        id: "cna", label: "CNA", name: "CNA Singapore", nation: "Singapore", timeZone: "Asia/Singapore",
         hls: [
           "https://mediacorp-nca-prod-videos-bclive.akamaized.net/6379472319112/ap-southeast-1/6057994443001/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJob3N0IjoicGE2ODB1LmVncmVzcy5wcHRpOHciLCJhY2NvdW50X2lkIjoiNjA1Nzk5NDQ0MzAwMSIsImVobiI6Im1lZGlhY29ycC1uY2EtcHJvZC12aWRlb3MtYmNsaXZlLmFrYW1haXplZC5uZXQiLCJpc3MiOiJibGl2ZS1wbGF5YmFjay1zb3VyY2UtYXBpIiwic3ViIjoicGF0aG1hcHRva2VuIiwiYXVkIjpbIjYwNTc5OTQ0NDMwMDEiXSwianRpIjoiNjM3OTQ3MjMxOTExMiJ9.Cw77amOc6efNO32Sw9nD0SOhjQUc5ewKN8ZWJOPt15Y/playlist-hls.m3u8"
         ],
         site: "https://www.channelnewsasia.com/watch"
       },
       {
-        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia",
+        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia", timeZone: "Australia/Sydney",
         hls: [
           "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
           "https://c.mjh.nz/abc-news.m3u8"
@@ -46,7 +46,7 @@
         site: "https://www.abc.net.au/news/newschannel"
       },
       {
-        id: "sky", label: "SKY", name: "Sky News", nation: "UK",
+        id: "sky", label: "SKY", name: "Sky News", nation: "UK", timeZone: "Europe/London",
         hls: [
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/17501/sde-fast-skynews/master.m3u8",
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/v1/master/6404a5d732e04991ed59ac7790b61cc065c9aabd/prod-gb-lin-skynews-hls-25-web/master.m3u8"
@@ -54,14 +54,14 @@
         site: "https://news.sky.com/watch-live"
       },
       {
-        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA",
+        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://www.bloomberg.com/media-manifest/streams/us.m3u8"
         ],
         site: "https://www.bloomberg.com/live"
       },
       {
-        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA",
+        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://news20e7hhcb.airspace-cdn.cbsivideo.com/index.m3u8",
           "https://cbsnews.akamaized.net/hls/live/2020607/cbsnlineup_8/master.m3u8"
@@ -69,21 +69,21 @@
         site: "https://www.cbsnews.com/live/"
       },
       {
-        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA",
+        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA", timeZone: "America/New_York",
         hls: [
           "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
         ],
         site: "https://www.newsmax.com/max-tv/"
       },
       {
-        id: "first", label: "FIRST", name: "The First TV", nation: "USA",
+        id: "first", label: "FIRST", name: "The First TV", nation: "USA", timeZone: "America/Chicago",
         hls: [
           "https://thefirst-oando.amagi.tv/hls/amagi_hls_data_thefirstd-thefirst-oando/CDN/playlist.m3u8"
         ],
         site: "https://www.thefirsttv.com/watch/the-first-tv-live/"
       },
       {
-        id: "fstv", label: "FSTV", name: "Free Speech TV", nation: "USA",
+        id: "fstv", label: "FSTV", name: "Free Speech TV", nation: "USA", timeZone: "America/Denver",
         forceHlsJs: true,
         hls: [
           "https://na.linear.zype.com/f2f02a72-71d0-45f3-829f-4ae51f721102/86ef0177-697d-41c4-be57-c4d1a2b83cad-hls4/manifest/live_19.m3u8?rendition=480"
@@ -125,6 +125,7 @@
       scanNextBtn: document.getElementById("scanNextBtn"),
       layout: document.getElementById("layout"),
       previews: document.getElementById("previews"),
+      titleDate: document.getElementById("titleDate"),
       titleChan: document.getElementById("titleChan"),
       tickerTrack: document.getElementById("tickerTrack"),
       clock: document.getElementById("clock")
@@ -419,7 +420,7 @@
       el.live.classList.toggle("off", !on);
       el.sub.textContent = detail || face(s);
       el.pwrLed.className = "dot" + (on ? " on" : "");
-      el.titleChan.textContent = on ? ": " + face(s) : "";
+      updateTitleClock();
       [...el.tickerTrack.children].forEach((button) => button.classList.toggle("active", on && Number(button.dataset.stationIndex) === index));
     }
 
@@ -804,10 +805,26 @@
       });
     });
 
+    function updateTitleClock(d = new Date()) {
+      const pad = (n) => String(n).padStart(2, "0");
+      const hour24 = d.getHours();
+      const station = STATIONS[index];
+      let sourceTime;
+      try {
+        sourceTime = new Intl.DateTimeFormat("en-US", { timeZone: station.timeZone, hour: "numeric", minute: "2-digit", hour12: true }).format(d).replace(/\s/g, "");
+      } catch (_) {
+        const hour12 = hour24 % 12 || 12;
+        sourceTime = hour12 + ":" + pad(d.getMinutes()) + (hour24 >= 12 ? "PM" : "AM");
+      }
+      el.titleDate.textContent = d.getFullYear() + "." + (d.getMonth() + 1) + "." + d.getDate() + " " + pad(hour24) + ":" + pad(d.getMinutes()) + " ";
+      el.titleChan.textContent = ": " + sourceTime + " " + face(station);
+    }
+
     function tickClock() {
       const d = new Date();
       const pad = (n) => String(n).padStart(2, "0");
       el.clock.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+      updateTitleClock(d);
       if (scanMode) {
         const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
         const mins = Math.floor(remaining / 60);
