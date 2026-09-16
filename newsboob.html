@@ -555,6 +555,7 @@
       height: 100%;
     }
     #hlsVideo { background: #000; object-fit: contain; }
+    #hlsVideo::cue { color: #fff; background: rgba(0, 0, 0, .82); font-family: var(--font); }
     #yt { border: 0; }
     .scan {
       pointer-events: none;
@@ -633,6 +634,9 @@
     .dot.warn { background: var(--mag); }
 
     .bezel-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .bezel-btn:disabled { opacity: .38; cursor: not-allowed; }
+    .bezel-btn:disabled:hover { color: var(--dim); border-color: var(--line); background: transparent; }
+    .cc-btn.active { color: var(--cyan); border-color: var(--cyan); background: rgba(61,255,210,.08); }
     .ticker {
       flex: 1 1 auto;
       max-width: none;
@@ -771,6 +775,7 @@
                 <input id="vol" type="range" min="0" max="100" value="80" />
               </label>
               <button class="bezel-btn" id="muteBtn" type="button">Mute</button>
+              <button class="bezel-btn cc-btn" id="ccBtn" type="button" aria-pressed="false" aria-label="Captions unavailable" title="Captions unavailable on this channel" disabled>CC</button>
               <button class="bezel-btn" id="reloadBtn" type="button">Reload</button>
               <button class="bezel-btn" id="fsBtn" type="button">Full</button>
             </div>
@@ -779,6 +784,6 @@
       </div>
     </div>
   </div>
-  <script src="player.js?v=20260902-4"></script>
+  <script src="player.js?v=20260915-1"></script>
 </body>
 </html>

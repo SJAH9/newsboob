@@ -114,6 +114,7 @@
       ytHost: document.getElementById("yt"),
       vol: document.getElementById("vol"),
       muteBtn: document.getElementById("muteBtn"),
+      ccBtn: document.getElementById("ccBtn"),
       fsBtn: document.getElementById("fsBtn"),
       prevBtn: document.getElementById("prevBtn"),
       nextBtn: document.getElementById("nextBtn"),
@@ -134,6 +135,8 @@
     let locked = -1;
     let token = 0;
     let hls = null;
+    let captionSelection = -1;
+    let captionRefreshTimers = [];
     const previewPlayers = new Map();
     let muted = false;
     let panelOpen = localStorage.getItem("newsboob.panel") !== "0";
@@ -182,6 +185,7 @@
     }
 
     function stopHls() {
+      resetCaptions();
       if (hls) { hls.destroy(); hls = null; }
       el.video.onloadedmetadata = null;
       el.video.onerror = null;
@@ -189,6 +193,73 @@
       el.video.removeAttribute("src");
       el.video.load();
       el.video.style.display = "none";
+    }
+
+    function captionTracks() {
+      return Array.from(el.video.textTracks || []);
+    }
+
+    function captionName(track, i) {
+      return (track.language || track.label || ("CC" + (i + 1))).toUpperCase();
+    }
+
+    function updateCaptionControl() {
+      const tracks = captionTracks();
+      if (captionSelection >= tracks.length) captionSelection = -1;
+      tracks.forEach((track, i) => { track.mode = i === captionSelection ? "showing" : "disabled"; });
+
+      const available = tracks.length > 0;
+      const active = available && captionSelection >= 0;
+      el.ccBtn.disabled = !available;
+      el.ccBtn.classList.toggle("active", active);
+      el.ccBtn.setAttribute("aria-pressed", String(active));
+      if (!available) {
+        el.ccBtn.textContent = "CC";
+        el.ccBtn.setAttribute("aria-label", "Captions unavailable");
+        el.ccBtn.title = "Captions unavailable on this channel";
+      } else if (!active) {
+        el.ccBtn.textContent = "CC";
+        el.ccBtn.setAttribute("aria-label", "Turn captions on");
+        el.ccBtn.title = tracks.length > 1 ? "Captions off; select a caption track" : "Captions off; turn captions on";
+      } else {
+        const name = captionName(tracks[captionSelection], captionSelection);
+        el.ccBtn.textContent = "CC " + name;
+        el.ccBtn.setAttribute("aria-label", "Captions " + name + "; select next option");
+        el.ccBtn.title = "Captions: " + name;
+      }
+    }
+
+    function scheduleCaptionRefresh() {
+      captionRefreshTimers.forEach(clearTimeout);
+      captionRefreshTimers = [0, 250, 1000, 2500].map((delay) => setTimeout(updateCaptionControl, delay));
+    }
+
+    function resetCaptions() {
+      captionRefreshTimers.forEach(clearTimeout);
+      captionRefreshTimers = [];
+      captionSelection = -1;
+      captionTracks().forEach((track) => { track.mode = "disabled"; });
+      if (el.ccBtn) {
+        el.ccBtn.disabled = true;
+        el.ccBtn.classList.remove("active");
+        el.ccBtn.setAttribute("aria-pressed", "false");
+        el.ccBtn.setAttribute("aria-label", "Captions unavailable");
+        el.ccBtn.textContent = "CC";
+        el.ccBtn.title = "Captions unavailable on this channel";
+      }
+    }
+
+    function cycleCaptions() {
+      const tracks = captionTracks();
+      if (!tracks.length) return;
+      captionSelection = captionSelection + 1;
+      if (captionSelection >= tracks.length) captionSelection = -1;
+      if (hls) {
+        hls.subtitleDisplay = captionSelection >= 0;
+        if (captionSelection < 0) hls.subtitleTrack = -1;
+        else if (captionSelection < hls.subtitleTracks.length) hls.subtitleTrack = captionSelection;
+      }
+      updateCaptionControl();
     }
 
     function stopYt() {
@@ -390,6 +461,7 @@
           settled = true;
           clearTimeout(timer);
           if (gen !== token) return;
+          scheduleCaptionRefresh();
           startPlayback();
         };
         const timer = setTimeout(() => fail(new Error("timeout")), 14000);
@@ -430,8 +502,11 @@
             hls.autoLevelCapping = -1;
             hls.startLevel = best;
             hls.nextLevel = best;
+            scheduleCaptionRefresh();
             ok();
           });
+          hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, scheduleCaptionRefresh);
+          hls.on(Hls.Events.NON_NATIVE_TEXT_TRACKS_FOUND, scheduleCaptionRefresh);
           hls.on(Hls.Events.ERROR, (_, data) => {
             if (!data.fatal) {
               if (data.details === "bufferStalledError") hls.startLoad();
@@ -645,6 +720,7 @@
     el.nextBtn.addEventListener("click", () => go(index + 1));
     el.vol.addEventListener("input", applyVolume);
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
+    el.ccBtn.addEventListener("click", cycleCaptions);
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
     el.scanBtn.addEventListener("click", () => setScanMode(!scanMode));
@@ -653,6 +729,11 @@
     el.video.addEventListener("pointerdown", () => {
       if (el.video.paused) el.video.play().catch(() => {});
     });
+    if (el.video.textTracks && el.video.textTracks.addEventListener) {
+      el.video.textTracks.addEventListener("addtrack", scheduleCaptionRefresh);
+      el.video.textTracks.addEventListener("removetrack", scheduleCaptionRefresh);
+      el.video.textTracks.addEventListener("change", updateCaptionControl);
+    }
     el.fsBtn.addEventListener("click", () => {
       const frame = document.querySelector(".set");
       const active = document.fullscreenElement || document.webkitFullscreenElement;
@@ -694,6 +775,7 @@
       if (e.key === "ArrowUp") { e.preventDefault(); el.vol.value = String(Math.min(100, Number(el.vol.value) + 10)); applyVolume(); }
       if (e.key === "ArrowDown") { e.preventDefault(); el.vol.value = String(Math.max(0, Number(el.vol.value) - 10)); applyVolume(); }
       if (e.key.toLowerCase() === "m") { muted = !muted; applyVolume(); }
+      if (e.key.toLowerCase() === "v") { e.preventDefault(); cycleCaptions(); }
       if (e.key.toLowerCase() === "c") { e.preventDefault(); setPanel(!panelOpen); }
       if (e.key.toLowerCase() === "f") { e.preventDefault(); el.fsBtn.click(); }
       if (e.key.toLowerCase() === "r") { e.preventDefault(); reloadStream(); }
