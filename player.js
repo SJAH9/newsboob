@@ -200,16 +200,58 @@
       return Array.from(el.video.textTracks || []).filter((track) => track.kind === "captions" || track.kind === "subtitles");
     }
 
-    function captionName(track, i) {
-      return (track.language || track.label || ("CC" + (i + 1))).toUpperCase();
+    function captionsMatch(browserTrack, hlsTrack) {
+      const browserLanguage = (browserTrack.language || "").toLowerCase();
+      const browserLabel = (browserTrack.label || "").toLowerCase();
+      const hlsLanguage = (hlsTrack.lang || "").toLowerCase();
+      const hlsLabel = (hlsTrack.name || "").toLowerCase();
+      return (browserLanguage && hlsLanguage && browserLanguage === hlsLanguage) ||
+        (browserLabel && hlsLabel && browserLabel === hlsLabel);
+    }
+
+    function captionOptions() {
+      const browserTracks = captionTracks();
+      const options = [];
+      const subtitleTracks = hls && Array.isArray(hls.subtitleTracks) ? hls.subtitleTracks : [];
+      subtitleTracks.forEach((track, hlsIndex) => {
+        options.push({
+          type: "hls",
+          hlsIndex,
+          language: track.lang || "",
+          label: track.name || "",
+          browserTrack: browserTracks.find((browserTrack) => captionsMatch(browserTrack, track)) || null
+        });
+      });
+      browserTracks.forEach((browserTrack) => {
+        if (options.some((option) => option.browserTrack === browserTrack)) return;
+        options.push({
+          type: "browser",
+          language: browserTrack.language || "",
+          label: browserTrack.label || "",
+          browserTrack
+        });
+      });
+      return options;
+    }
+
+    function captionName(option, i) {
+      return (option.language || option.label || ("CC" + (i + 1))).toUpperCase();
     }
 
     function updateCaptionControl() {
-      const tracks = captionTracks();
-      if (captionSelection >= tracks.length) captionSelection = -1;
-      tracks.forEach((track, i) => { track.mode = i === captionSelection ? "showing" : "disabled"; });
+      const options = captionOptions();
+      if (captionSelection >= options.length) captionSelection = -1;
+      captionTracks().forEach((track) => { track.mode = "disabled"; });
 
-      const available = tracks.length > 0;
+      if (hls) {
+        hls.subtitleDisplay = captionSelection >= 0;
+        hls.subtitleTrack = captionSelection >= 0 && options[captionSelection].type === "hls" ? options[captionSelection].hlsIndex : -1;
+      }
+      if (captionSelection >= 0 && options[captionSelection].browserTrack) {
+        options[captionSelection].browserTrack.mode = "showing";
+      }
+
+      const available = options.length > 0;
       const active = available && captionSelection >= 0;
       el.ccBtn.disabled = !available;
       el.ccBtn.classList.toggle("active", active);
@@ -221,9 +263,9 @@
       } else if (!active) {
         el.ccBtn.textContent = "CC";
         el.ccBtn.setAttribute("aria-label", "Turn captions on");
-        el.ccBtn.title = tracks.length > 1 ? "Captions off; select a caption track" : "Captions off; turn captions on";
+        el.ccBtn.title = options.length > 1 ? "Captions off; select a caption track" : "Captions off; turn captions on";
       } else {
-        const name = captionName(tracks[captionSelection], captionSelection);
+        const name = captionName(options[captionSelection], captionSelection);
         el.ccBtn.textContent = "CC " + name;
         el.ccBtn.setAttribute("aria-label", "Captions " + name + "; select next option");
         el.ccBtn.title = "Captions: " + name;
@@ -251,24 +293,10 @@
     }
 
     function cycleCaptions() {
-      const tracks = captionTracks();
-      if (!tracks.length) return;
+      const options = captionOptions();
+      if (!options.length) return;
       captionSelection = captionSelection + 1;
-      if (captionSelection >= tracks.length) captionSelection = -1;
-      if (hls) {
-        hls.subtitleDisplay = captionSelection >= 0;
-        if (captionSelection < 0) hls.subtitleTrack = -1;
-        else {
-          const selected = tracks[captionSelection];
-          const selectedLanguage = (selected.language || "").toLowerCase();
-          const selectedLabel = (selected.label || "").toLowerCase();
-          const subtitleIndex = hls.subtitleTracks.findIndex((track) =>
-            (selectedLanguage && (track.lang || "").toLowerCase() === selectedLanguage) ||
-            (selectedLabel && (track.name || "").toLowerCase() === selectedLabel)
-          );
-          if (subtitleIndex >= 0) hls.subtitleTrack = subtitleIndex;
-        }
-      }
+      if (captionSelection >= options.length) captionSelection = -1;
       updateCaptionControl();
     }
 
