@@ -61,7 +61,7 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 | Up / Down | Raise or lower volume |
 | `1`–`9`, `0` | Select the corresponding channel |
 | Space or `M` | Toggle mute |
-| `V` | Cycle available caption tracks or turn captions off |
+| `V` | Toggle automatic captions on or off |
 | `C` | Open or close the channel selector |
 | `F` | Enter or leave framed fullscreen |
 | `R` | Reload the current stream |
@@ -69,7 +69,7 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 
 The **Full** control takes the complete NewsBoob set fullscreen, retaining its player bezel, source status, controls, and channel ticker. It changes to **Exit** while fullscreen is active.
 
-The **CC** control becomes available when the selected HLS stream supplies captions or subtitles. Select it to turn on the first available track, continue selecting it to cycle through additional tracks, and select it once more to return to captions off. NewsBoob reads tracks already carried by the stream and does not send audio to a captioning service.
+The **CC** control is always available. Captions are automatic by default: NewsBoob displays the first caption or subtitle track whenever the selected stream supplies one. Select **CC** (or press `V`) to switch captions off, and select it again to restore automatic captions. NewsBoob reads tracks already carried by the stream and does not send audio to a captioning service.
 
 ## Host NewsBoob on your website
 

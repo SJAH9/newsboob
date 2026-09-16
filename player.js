@@ -136,7 +136,8 @@
     let locked = -1;
     let token = 0;
     let hls = null;
-    let captionSelection = -1;
+    let captionSelection = 0;
+    let captionsEnabled = true;
     let captionRefreshTimers = [];
     const previewPlayers = new Map();
     let muted = false;
@@ -240,35 +241,35 @@
 
     function updateCaptionControl() {
       const options = captionOptions();
-      if (captionSelection >= options.length) captionSelection = -1;
+      if (captionSelection >= options.length) captionSelection = 0;
       captionTracks().forEach((track) => { track.mode = "disabled"; });
 
+      const available = options.length > 0;
+      const active = captionsEnabled && available;
       if (hls) {
-        hls.subtitleDisplay = captionSelection >= 0;
-        hls.subtitleTrack = captionSelection >= 0 && options[captionSelection].type === "hls" ? options[captionSelection].hlsIndex : -1;
+        hls.subtitleDisplay = active;
+        hls.subtitleTrack = active && options[captionSelection].type === "hls" ? options[captionSelection].hlsIndex : -1;
       }
-      if (captionSelection >= 0 && options[captionSelection].browserTrack) {
+      if (active && options[captionSelection].browserTrack) {
         options[captionSelection].browserTrack.mode = "showing";
       }
 
-      const available = options.length > 0;
-      const active = available && captionSelection >= 0;
-      el.ccBtn.disabled = !available;
-      el.ccBtn.classList.toggle("active", active);
-      el.ccBtn.setAttribute("aria-pressed", String(active));
-      if (!available) {
-        el.ccBtn.textContent = "CC";
-        el.ccBtn.setAttribute("aria-label", "Captions unavailable");
-        el.ccBtn.title = "Captions unavailable on this channel";
-      } else if (!active) {
-        el.ccBtn.textContent = "CC";
-        el.ccBtn.setAttribute("aria-label", "Turn captions on");
-        el.ccBtn.title = options.length > 1 ? "Captions off; select a caption track" : "Captions off; turn captions on";
+      el.ccBtn.disabled = false;
+      el.ccBtn.classList.toggle("active", captionsEnabled);
+      el.ccBtn.setAttribute("aria-pressed", String(captionsEnabled));
+      if (!captionsEnabled) {
+        el.ccBtn.textContent = "CC OFF";
+        el.ccBtn.setAttribute("aria-label", "Turn automatic captions on");
+        el.ccBtn.title = "Captions off; turn automatic captions on";
+      } else if (!available) {
+        el.ccBtn.textContent = "CC AUTO";
+        el.ccBtn.setAttribute("aria-label", "Automatic captions on; waiting for a caption track");
+        el.ccBtn.title = "Captions will appear automatically when available";
       } else {
         const name = captionName(options[captionSelection], captionSelection);
         el.ccBtn.textContent = "CC " + name;
-        el.ccBtn.setAttribute("aria-label", "Captions " + name + "; select next option");
-        el.ccBtn.title = "Captions: " + name;
+        el.ccBtn.setAttribute("aria-label", "Captions " + name + " on; turn captions off");
+        el.ccBtn.title = "Captions on: " + name;
       }
     }
 
@@ -280,23 +281,21 @@
     function resetCaptions() {
       captionRefreshTimers.forEach(clearTimeout);
       captionRefreshTimers = [];
-      captionSelection = -1;
+      captionSelection = 0;
       captionTracks().forEach((track) => { track.mode = "disabled"; });
       if (el.ccBtn) {
-        el.ccBtn.disabled = true;
-        el.ccBtn.classList.remove("active");
-        el.ccBtn.setAttribute("aria-pressed", "false");
-        el.ccBtn.setAttribute("aria-label", "Captions unavailable");
-        el.ccBtn.textContent = "CC";
-        el.ccBtn.title = "Captions unavailable on this channel";
+        el.ccBtn.disabled = false;
+        el.ccBtn.classList.toggle("active", captionsEnabled);
+        el.ccBtn.setAttribute("aria-pressed", String(captionsEnabled));
+        el.ccBtn.setAttribute("aria-label", captionsEnabled ? "Automatic captions on; waiting for a caption track" : "Turn automatic captions on");
+        el.ccBtn.textContent = captionsEnabled ? "CC AUTO" : "CC OFF";
+        el.ccBtn.title = captionsEnabled ? "Captions will appear automatically when available" : "Captions off; turn automatic captions on";
       }
     }
 
     function cycleCaptions() {
-      const options = captionOptions();
-      if (!options.length) return;
-      captionSelection = captionSelection + 1;
-      if (captionSelection >= options.length) captionSelection = -1;
+      captionsEnabled = !captionsEnabled;
+      captionSelection = 0;
       updateCaptionControl();
     }
 
