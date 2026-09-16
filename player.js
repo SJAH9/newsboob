@@ -1,6 +1,6 @@
     const STATIONS = [
       {
-        id: "dw", label: "DW", name: "Deutsche Welle",
+        id: "dw", label: "DW", name: "Deutsche Welle", nation: "Germany",
         hls: [
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8",
           "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/master.m3u8"
@@ -8,7 +8,7 @@
         site: "https://www.dw.com/en/live-tv/channel-english"
       },
       {
-        id: "f24", label: "F24", name: "France 24",
+        id: "f24", label: "F24", name: "France 24", nation: "France",
         hls: [
           "https://live.france24.com/hls/live/2037218-b/F24_EN_HI_HLS/master_5000.m3u8",
           "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8"
@@ -16,14 +16,14 @@
         site: "https://www.france24.com/en/live"
       },
       {
-        id: "eur", label: "EUR", name: "Euronews",
+        id: "eur", label: "EUR", name: "Euronews", nation: "Europe",
         hls: [
           "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8"
         ],
         site: "https://www.euronews.com/live"
       },
       {
-        id: "rt", label: "RT", name: "RT News",
+        id: "rt", label: "RT", name: "RT News", nation: "Russia",
         hls: [
           "https://rt-glb.rttv.com/dvr/rtnews/playlist.m3u8",
           "https://rt-glb.rttv.com/live/rtnews/playlist.m3u8"
@@ -31,14 +31,14 @@
         site: "https://www.rt.com/"
       },
       {
-        id: "cna", label: "CNA", name: "CNA Singapore",
+        id: "cna", label: "CNA", name: "CNA Singapore", nation: "Singapore",
         hls: [
           "https://mediacorp-nca-prod-videos-bclive.akamaized.net/6379472319112/ap-southeast-1/6057994443001/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJob3N0IjoicGE2ODB1LmVncmVzcy5wcHRpOHciLCJhY2NvdW50X2lkIjoiNjA1Nzk5NDQ0MzAwMSIsImVobiI6Im1lZGlhY29ycC1uY2EtcHJvZC12aWRlb3MtYmNsaXZlLmFrYW1haXplZC5uZXQiLCJpc3MiOiJibGl2ZS1wbGF5YmFjay1zb3VyY2UtYXBpIiwic3ViIjoicGF0aG1hcHRva2VuIiwiYXVkIjpbIjYwNTc5OTQ0NDMwMDEiXSwianRpIjoiNjM3OTQ3MjMxOTExMiJ9.Cw77amOc6efNO32Sw9nD0SOhjQUc5ewKN8ZWJOPt15Y/playlist-hls.m3u8"
         ],
         site: "https://www.channelnewsasia.com/watch"
       },
       {
-        id: "abcau", label: "ABC AU", name: "ABC News Australia",
+        id: "abcau", label: "ABC AU", name: "ABC News Australia", nation: "Australia",
         hls: [
           "https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8",
           "https://c.mjh.nz/abc-news.m3u8"
@@ -46,7 +46,7 @@
         site: "https://www.abc.net.au/news/newschannel"
       },
       {
-        id: "sky", label: "SKY", name: "Sky News",
+        id: "sky", label: "SKY", name: "Sky News", nation: "UK",
         hls: [
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/17501/sde-fast-skynews/master.m3u8",
           "https://linear901-oo-hls0-prd-gtm.delivery.skycdp.com/v1/master/6404a5d732e04991ed59ac7790b61cc065c9aabd/prod-gb-lin-skynews-hls-25-web/master.m3u8"
@@ -54,14 +54,14 @@
         site: "https://news.sky.com/watch-live"
       },
       {
-        id: "bbg", label: "BBG", name: "Bloomberg TV",
+        id: "bbg", label: "BBG", name: "Bloomberg TV", nation: "USA",
         hls: [
           "https://www.bloomberg.com/media-manifest/streams/us.m3u8"
         ],
         site: "https://www.bloomberg.com/live"
       },
       {
-        id: "cbs", label: "CBS", name: "CBS News 24/7",
+        id: "cbs", label: "CBS", name: "CBS News 24/7", nation: "USA",
         hls: [
           "https://news20e7hhcb.airspace-cdn.cbsivideo.com/index.m3u8",
           "https://cbsnews.akamaized.net/hls/live/2020607/cbsnlineup_8/master.m3u8"
@@ -69,21 +69,21 @@
         site: "https://www.cbsnews.com/live/"
       },
       {
-        id: "nmx", label: "NMX", name: "Newsmax",
+        id: "nmx", label: "NMX", name: "Newsmax", nation: "USA",
         hls: [
           "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
         ],
         site: "https://www.newsmax.com/max-tv/"
       },
       {
-        id: "first", label: "FIRST", name: "The First TV",
+        id: "first", label: "FIRST", name: "The First TV", nation: "USA",
         hls: [
           "https://thefirst-oando.amagi.tv/hls/amagi_hls_data_thefirstd-thefirst-oando/CDN/playlist.m3u8"
         ],
         site: "https://www.thefirsttv.com/watch/the-first-tv-live/"
       },
       {
-        id: "fstv", label: "FSTV", name: "Free Speech TV",
+        id: "fstv", label: "FSTV", name: "Free Speech TV", nation: "USA",
         forceHlsJs: true,
         hls: [
           "https://na.linear.zype.com/f2f02a72-71d0-45f3-829f-4ae51f721102/86ef0177-697d-41c4-be57-c4d1a2b83cad-hls4/manifest/live_19.m3u8?rendition=480"
@@ -91,6 +91,10 @@
         site: "https://freespeech.org/live-tv/"
       }
     ];
+
+    function face(station) {
+      return station.nation || station.label;
+    }
 
     const el = {
       dial: document.getElementById("dial"),
@@ -145,7 +149,7 @@
       const tick = document.createElement("div");
       tick.className = "tick";
       tick.style.transform = `rotate(${i * STEP}deg)`;
-      tick.innerHTML = `<i></i><span style="transform:rotate(${-i * STEP}deg)">${s.label}</span>`;
+      tick.innerHTML = `<i></i><span style="transform:rotate(${-i * STEP}deg)">${face(s)}</span>`;
       tick.querySelector("span").addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -154,9 +158,9 @@
       el.ticks.appendChild(tick);
       const tickerButton = document.createElement("button");
       tickerButton.type = "button";
-      tickerButton.textContent = s.name;
+      tickerButton.textContent = face(s);
       tickerButton.dataset.stationIndex = String(i);
-      tickerButton.setAttribute("aria-label", "Select " + s.name);
+      tickerButton.setAttribute("aria-label", "Select " + face(s));
       tickerButton.addEventListener("click", () => go(i));
       el.tickerTrack.appendChild(tickerButton);
     });
@@ -250,15 +254,15 @@
       const tile = document.createElement("button");
       tile.type = "button";
       tile.className = "preview";
-      tile.setAttribute("aria-label", "Monitor " + station.name);
-      tile.title = station.name;
+      tile.setAttribute("aria-label", "Monitor " + face(station));
+      tile.title = face(station);
       const hoverLabel = document.createElement("span");
       hoverLabel.className = "hover-label";
-      hoverLabel.textContent = station.name;
+      hoverLabel.textContent = face(station);
       tile.appendChild(hoverLabel);
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = station.name;
+      tag.textContent = face(station);
       tile.addEventListener("click", () => go(stationIndex));
       el.previews.appendChild(tile);
 
@@ -331,11 +335,11 @@
 
     function setStatus(src, detail) {
       const s = STATIONS[index];
-      el.call.textContent = on ? s.label : "STANDBY";
+      el.call.textContent = on ? face(s) : "STANDBY";
       el.live.classList.toggle("off", !on);
-      el.sub.textContent = detail || s.name;
+      el.sub.textContent = detail || face(s);
       el.pwrLed.className = "dot" + (on ? " on" : "");
-      el.titleChan.textContent = on ? ": " + s.name : "";
+      el.titleChan.textContent = on ? ": " + face(s) : "";
       [...el.tickerTrack.children].forEach((button) => button.classList.toggle("active", on && Number(button.dataset.stationIndex) === index));
     }
 
@@ -476,9 +480,9 @@
       stopHls();
       stopYt();
       el.offair.classList.remove("hidden");
-      el.offTitle.textContent = station.label;
+      el.offTitle.textContent = face(station);
       el.offCopy.textContent = detail ||
-        (station.name + " native stream did not lock. Open their live page if this feed is down.");
+        (face(station) + " native stream did not lock. Open their live page if this feed is down.");
       el.offLink.href = station.site;
     }
 
@@ -510,26 +514,26 @@
       const gen = ++token;
       locked = i;
       hideOffAir();
-      setStatus("tuning", s.name + " · locking signal…");
+      setStatus("tuning", face(s) + " · locking signal…");
       el.pwrLed.className = "dot warn";
 
       if (hlsList(s).length) {
         try {
           await playNative(s, gen);
           if (gen !== token) return;
-          setStatus("source stream", s.name);
+          setStatus("source stream", face(s));
           applyVolume();
           return;
         } catch (_) {
           if (gen !== token) return;
-          showOffAir(s, s.name + " native stream did not lock. Use the official live page.");
-          setStatus("no lock", s.name);
+          showOffAir(s, face(s) + " native stream did not lock. Use the official live page.");
+          setStatus("no lock", face(s));
           return;
         }
       }
 
-      showOffAir(s, s.name + " has no public HLS stream we can play in this tuner.");
-      setStatus("no lock", s.name);
+      showOffAir(s, face(s) + " has no public HLS stream we can play in this tuner.");
+      setStatus("no lock", face(s));
     }
 
     function powerOn() {

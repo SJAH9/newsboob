@@ -18,7 +18,7 @@ Keep all three files in the same directory unless you also update the two script
 
 The player includes:
 
-- a channel selector with a fixed two-column live-monitor grid;
+- a nation-based channel selector with a fixed two-column live-monitor grid;
 - previous, next, scan, reload, mute, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
 - keyboard navigation and a 30-second scan countdown; and
@@ -94,6 +94,7 @@ Each channel is an object in the `STATIONS` array at the top of `player.js`. Add
   id: "host-media",
   label: "HOST",
   name: "Host Media",
+  nation: "Host Media",
   forceHlsJs: true,
   hls: [
     "https://your-site.example/live/index.m3u8"
@@ -108,7 +109,8 @@ The fields have the following purposes:
 |---|---|
 | `id` | A unique, stable identifier used by the player. Use lowercase letters, numbers, and hyphens. |
 | `label` | The compact callsign shown by space-constrained controls. |
-| `name` | The full channel title used in the ticker and status display. |
+| `name` | The broadcaster or channel name retained as source metadata. |
+| `nation` | The nation-of-origin name shown on the dial, ticker, status display, and channel selector. |
 | `hls` | One HLS manifest URL, or an ordered list of primary and fallback manifests. |
 | `site` | The page opened when the stream is unavailable. |
 | `forceHlsJs` | Uses the bundled HLS engine when supported. This is useful for consistent behavior with a host-managed stream. |
@@ -141,6 +143,7 @@ The equivalent portable channel entry is:
   id: "host-media",
   label: "HOST",
   name: "Host Media",
+  nation: "Host Media",
   forceHlsJs: true,
   hls: [
     "https://sidhubbard.com/live/index.m3u8"
