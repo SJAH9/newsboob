@@ -157,6 +157,9 @@
     let scanContext = null;
     let scanPreviousFrame = null;
     let scanFrameUnavailable = false;
+    let scanFrameSeen = false;
+    let scanStartedAt = 0;
+    let scanLastFrameAttempt = 0;
     const STEP = 360 / STATIONS.length;
     let needle = index * STEP;
 
@@ -289,6 +292,8 @@
       }
 
       const video = document.createElement("video");
+      // AUTO reads this muted channel thumbnail, never the main player.
+      video.crossOrigin = "anonymous";
       video.muted = true;
       video.playsInline = true;
       video.autoplay = true;
@@ -299,8 +304,21 @@
       tile.appendChild(video);
       tile.appendChild(tag);
 
+      let handle = null;
+      let nativeWithoutCors = false;
       const fail = () => {
         if (!previewPlayers.has(station.id)) return;
+        if (handle?.native && !nativeWithoutCors) {
+          nativeWithoutCors = true;
+          // Preserve the thumbnail even if this feed does not permit canvas inspection.
+          video.pause();
+          video.removeAttribute("src");
+          video.removeAttribute("crossorigin");
+          video.load();
+          video.src = url;
+          video.play().catch(() => {});
+          return;
+        }
         const urls = hlsList(station);
         if (urlIndex + 1 < urls.length) {
           killPreview(station.id);
@@ -310,7 +328,7 @@
         tile.classList.add("live-off");
       };
 
-      const handle = attachPreviewStream(video, url);
+      handle = attachPreviewStream(video, url);
       if (!handle) {
         tile.classList.add("live-off");
         previewPlayers.set(station.id, { video, tile, hls: null });
@@ -326,15 +344,15 @@
     }
 
     function syncPreviews() {
-      if (!on || !panelOpen) {
+      if (!on || (!panelOpen && !(scanMode && scanType === "auto"))) {
         [...previewPlayers.keys()].forEach(killPreview);
         el.previews.classList.remove("on");
         return;
       }
-      const want = STATIONS
+      const want = (panelOpen ? STATIONS : [STATIONS[index]])
         .map((s, i) => ({
           s,
-          i,
+          i: panelOpen ? i : index,
           urls: hlsList(s)
         }));
       [...previewPlayers.keys()].forEach((id) => {
@@ -345,7 +363,7 @@
         else el.previews.appendChild(previewPlayers.get(s.id).tile);
         previewPlayers.get(s.id).tile.classList.toggle("active", i === index);
       });
-      el.previews.classList.toggle("on", previewPlayers.size > 0);
+      el.previews.classList.toggle("on", panelOpen && previewPlayers.size > 0);
     }
 
     function setStatus(src, detail) {
@@ -558,7 +576,7 @@
       on = true;
       el.veil.classList.add("hidden");
       el.pwrLed.className = "dot on";
-      if (panelOpen) syncPreviews();
+      if (panelOpen || (scanMode && scanType === "auto")) syncPreviews();
     }
 
     function resetScanWindow() {
@@ -568,6 +586,9 @@
       scanStableFrames = 0;
       scanPreviousFrame = null;
       scanFrameUnavailable = false;
+      scanFrameSeen = false;
+      scanStartedAt = Date.now();
+      scanLastFrameAttempt = 0;
       scanCanvas = null;
       scanContext = null;
     }
@@ -581,15 +602,18 @@
           Math.abs(current[i + 1] - previous[i + 1]) +
           Math.abs(current[i + 2] - previous[i + 2])) / 3;
         totalDifference += difference;
-        if (difference > 50) changedPixels += 1;
+        if (difference > 35) changedPixels += 1;
       }
-      return totalDifference / pixels > 40 && changedPixels / pixels > 0.35;
+      return totalDifference / pixels > 25 && changedPixels / pixels > 0.35;
     }
 
     function scanForVisualCut() {
-      const video = el.video;
-      if (scanFrameUnavailable || document.hidden || video.style.display === "none" ||
+      const video = previewPlayers.get(STATIONS[index].id)?.video;
+      if (!video || document.hidden ||
           video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return null;
+      // A transient readback failure must not disable AUTO for the entire channel.
+      if (scanFrameUnavailable && Date.now() - scanLastFrameAttempt < 3000) return null;
+      scanLastFrameAttempt = Date.now();
       try {
         if (!scanCanvas) {
           scanCanvas = document.createElement("canvas");
@@ -602,11 +626,15 @@
         const current = scanContext.getImageData(0, 0, 24, 14).data;
         const cut = scanPreviousFrame && scanFrameIsCut(scanPreviousFrame, current);
         scanPreviousFrame = new Uint8Array(current);
+        scanFrameSeen = true;
+        scanFrameUnavailable = false;
         return !!cut;
       } catch (_) {
-        // Cross-origin streams may block frame inspection; timed scanning remains available.
+        // Cross-origin streams may block frame inspection; retry in case it was transient.
         scanFrameUnavailable = true;
         scanPreviousFrame = null;
+        scanCanvas = null;
+        scanContext = null;
         return null;
       }
     }
@@ -626,7 +654,8 @@
       if (!scanMode) {
         el.scanStatus.textContent = "";
       } else if (scanType === "auto") {
-        el.scanStatus.textContent = scanFrameUnavailable ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
+        const noFrame = scanFrameUnavailable || (!scanFrameSeen && Date.now() - scanStartedAt > 5000);
+        el.scanStatus.textContent = noFrame ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
       } else {
         const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
         el.scanStatus.textContent = String(Math.floor(remaining / 60)).padStart(2, "0") + ":" + String(remaining % 60).padStart(2, "0");
@@ -664,10 +693,12 @@
         scanCanvas = null;
         scanContext = null;
         scanPreviousFrame = null;
+        if (on) syncPreviews();
         updateScanControls();
         return;
       }
       resetScanWindow();
+      if (on) syncPreviews();
       updateScanControls();
       if (!on) go(index);
       scanTimer = setInterval(scanTick, 250);
@@ -689,12 +720,7 @@
       el.panelBtn.textContent = open ? "<<" : ">>";
       el.panelBtn.setAttribute("aria-label", open ? "Hide tuner panel" : "Show tuner panel");
       el.panelBtn.title = open ? "Hide tuner panel" : "Show tuner panel";
-      if (!on) return;
-      if (open) syncPreviews();
-      else {
-        [...previewPlayers.keys()].forEach(killPreview);
-        el.previews.classList.remove("on");
-      }
+      if (on) syncPreviews();
     }
 
     async function reloadStream() {
