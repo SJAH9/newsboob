@@ -124,6 +124,7 @@
       scan60Btn: document.getElementById("scan60Btn"),
       scanCustom: document.getElementById("scanCustom"),
       scanStatus: document.getElementById("scanStatus"),
+      autoStatus: document.getElementById("autoStatus"),
       scanPrevBtn: document.getElementById("scanPrevBtn"),
       scanNextBtn: document.getElementById("scanNextBtn"),
       layout: document.getElementById("layout"),
@@ -157,6 +158,7 @@
     let scanContext = null;
     let scanPreviousFrame = null;
     let scanFrameUnavailable = false;
+    let scanFrameBlocked = false;
     let scanFrameSeen = false;
     let scanStartedAt = 0;
     let scanLastFrameAttempt = 0;
@@ -293,7 +295,6 @@
 
       const video = document.createElement("video");
       // AUTO reads this muted channel thumbnail, never the main player.
-      video.crossOrigin = "anonymous";
       video.muted = true;
       video.playsInline = true;
       video.autoplay = true;
@@ -304,21 +305,8 @@
       tile.appendChild(video);
       tile.appendChild(tag);
 
-      let handle = null;
-      let nativeWithoutCors = false;
       const fail = () => {
         if (!previewPlayers.has(station.id)) return;
-        if (handle?.native && !nativeWithoutCors) {
-          nativeWithoutCors = true;
-          // Preserve the thumbnail even if this feed does not permit canvas inspection.
-          video.pause();
-          video.removeAttribute("src");
-          video.removeAttribute("crossorigin");
-          video.load();
-          video.src = url;
-          video.play().catch(() => {});
-          return;
-        }
         const urls = hlsList(station);
         if (urlIndex + 1 < urls.length) {
           killPreview(station.id);
@@ -328,7 +316,7 @@
         tile.classList.add("live-off");
       };
 
-      handle = attachPreviewStream(video, url);
+      const handle = attachPreviewStream(video, url);
       if (!handle) {
         tile.classList.add("live-off");
         previewPlayers.set(station.id, { video, tile, hls: null });
@@ -344,15 +332,15 @@
     }
 
     function syncPreviews() {
-      if (!on || (!panelOpen && !(scanMode && scanType === "auto"))) {
+      if (!on || !panelOpen) {
         [...previewPlayers.keys()].forEach(killPreview);
         el.previews.classList.remove("on");
         return;
       }
-      const want = (panelOpen ? STATIONS : [STATIONS[index]])
+      const want = STATIONS
         .map((s, i) => ({
           s,
-          i: panelOpen ? i : index,
+          i,
           urls: hlsList(s)
         }));
       [...previewPlayers.keys()].forEach((id) => {
@@ -363,7 +351,7 @@
         else el.previews.appendChild(previewPlayers.get(s.id).tile);
         previewPlayers.get(s.id).tile.classList.toggle("active", i === index);
       });
-      el.previews.classList.toggle("on", panelOpen && previewPlayers.size > 0);
+      el.previews.classList.toggle("on", previewPlayers.size > 0);
     }
 
     function setStatus(src, detail) {
@@ -576,7 +564,7 @@
       on = true;
       el.veil.classList.add("hidden");
       el.pwrLed.className = "dot on";
-      if (panelOpen || (scanMode && scanType === "auto")) syncPreviews();
+      if (panelOpen) syncPreviews();
     }
 
     function resetScanWindow() {
@@ -586,6 +574,7 @@
       scanStableFrames = 0;
       scanPreviousFrame = null;
       scanFrameUnavailable = false;
+      scanFrameBlocked = false;
       scanFrameSeen = false;
       scanStartedAt = Date.now();
       scanLastFrameAttempt = 0;
@@ -609,7 +598,7 @@
 
     function scanForVisualCut() {
       const video = previewPlayers.get(STATIONS[index].id)?.video;
-      if (!video || document.hidden ||
+      if (!panelOpen || !video || scanFrameBlocked || document.hidden ||
           video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return null;
       // A transient readback failure must not disable AUTO for the entire channel.
       if (scanFrameUnavailable && Date.now() - scanLastFrameAttempt < 3000) return null;
@@ -629,8 +618,9 @@
         scanFrameSeen = true;
         scanFrameUnavailable = false;
         return !!cut;
-      } catch (_) {
-        // Cross-origin streams may block frame inspection; retry in case it was transient.
+      } catch (error) {
+        // A browser security boundary is final for this channel; never retry around it.
+        if (error?.name === "SecurityError") scanFrameBlocked = true;
         scanFrameUnavailable = true;
         scanPreviousFrame = null;
         scanCanvas = null;
@@ -644,6 +634,8 @@
     }
 
     function updateScanControls() {
+      el.scanBtn.disabled = !panelOpen;
+      el.scanBtn.title = panelOpen ? "Switch after two distinct strong visual changes" : "Open the channel drawer to use AUTO";
       for (const [type, button] of [["auto", el.scanBtn], ["30", el.scan30Btn], ["60", el.scan60Btn]]) {
         const active = scanMode && scanType === type;
         button.classList.toggle("active", active);
@@ -653,11 +645,14 @@
       el.scanCustom.setAttribute("aria-label", "Custom scan interval in seconds" + (scanMode && scanType === "custom" ? ", active" : ""));
       if (!scanMode) {
         el.scanStatus.textContent = "";
+        el.autoStatus.textContent = "";
       } else if (scanType === "auto") {
         const noFrame = scanFrameUnavailable || (!scanFrameSeen && Date.now() - scanStartedAt > 5000);
-        el.scanStatus.textContent = noFrame ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
+        el.scanStatus.textContent = "";
+        el.autoStatus.textContent = noFrame ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
       } else {
         const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
+        el.autoStatus.textContent = "";
         el.scanStatus.textContent = String(Math.floor(remaining / 60)).padStart(2, "0") + ":" + String(remaining % 60).padStart(2, "0");
       }
     }
@@ -684,6 +679,7 @@
     }
 
     function setScanMode(enabled) {
+      if (enabled && scanType === "auto" && !panelOpen) return;
       scanMode = enabled;
       if (scanTimer) {
         clearInterval(scanTimer);
@@ -693,12 +689,10 @@
         scanCanvas = null;
         scanContext = null;
         scanPreviousFrame = null;
-        if (on) syncPreviews();
         updateScanControls();
         return;
       }
       resetScanWindow();
-      if (on) syncPreviews();
       updateScanControls();
       if (!on) go(index);
       scanTimer = setInterval(scanTick, 250);
@@ -715,12 +709,14 @@
 
     function setPanel(open) {
       panelOpen = open;
+      if (!open && scanMode && scanType === "auto") setScanMode(false);
       localStorage.setItem("newsboob.panel", open ? "1" : "0");
       el.layout.classList.toggle("solo", !open);
       el.panelBtn.textContent = open ? "<<" : ">>";
       el.panelBtn.setAttribute("aria-label", open ? "Hide tuner panel" : "Show tuner panel");
       el.panelBtn.title = open ? "Hide tuner panel" : "Show tuner panel";
       if (on) syncPreviews();
+      updateScanControls();
     }
 
     async function reloadStream() {
