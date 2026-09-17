@@ -120,6 +120,7 @@
       panelBtn: document.getElementById("panelBtn"),
       reloadBtn: document.getElementById("reloadBtn"),
       scanBtn: document.getElementById("scanBtn"),
+      scanMarkBtn: document.getElementById("scanMarkBtn"),
       scan30Btn: document.getElementById("scan30Btn"),
       scan60Btn: document.getElementById("scan60Btn"),
       scanCustom: document.getElementById("scanCustom"),
@@ -151,17 +152,10 @@
     let scanCustomSeconds = 45;
     let scanDeadline = 0;
     let scanSwitching = false;
-    let scanCutCount = 0;
-    let scanCutArmed = true;
-    let scanStableFrames = 0;
-    let scanCanvas = null;
-    let scanContext = null;
-    let scanPreviousFrame = null;
-    let scanFrameUnavailable = false;
-    let scanFrameBlocked = false;
-    let scanFrameSeen = false;
-    let scanStartedAt = 0;
-    let scanLastFrameAttempt = 0;
+    let scanAutoPhase = "ready";
+    let scanAutoStartedAt = 0;
+    let scanAutoIntervalMs = 0;
+    let scanAutoMessage = "";
     const STEP = 360 / STATIONS.length;
     let needle = index * STEP;
 
@@ -500,7 +494,7 @@
     function showOffAir(station, detail) {
       stopHls();
       stopYt();
-      if (scanMode) scanDeadline = Math.min(scanDeadline, Date.now() + 5000);
+      if (scanMode && scanType !== "auto") scanDeadline = Math.min(scanDeadline, Date.now() + 5000);
       el.offair.classList.remove("hidden");
       el.offTitle.textContent = face(station);
       el.offCopy.textContent = detail ||
@@ -568,74 +562,44 @@
     }
 
     function resetScanWindow() {
-      scanDeadline = Date.now() + scanIntervalSeconds() * 1000;
-      scanCutCount = 0;
-      scanCutArmed = true;
-      scanStableFrames = 0;
-      scanPreviousFrame = null;
-      scanFrameUnavailable = false;
-      scanFrameBlocked = false;
-      scanFrameSeen = false;
-      scanStartedAt = Date.now();
-      scanLastFrameAttempt = 0;
-      scanCanvas = null;
-      scanContext = null;
-    }
-
-    function scanFrameIsCut(previous, current) {
-      let totalDifference = 0;
-      let changedPixels = 0;
-      const pixels = current.length / 4;
-      for (let i = 0; i < current.length; i += 4) {
-        const difference = (Math.abs(current[i] - previous[i]) +
-          Math.abs(current[i + 1] - previous[i + 1]) +
-          Math.abs(current[i + 2] - previous[i + 2])) / 3;
-        totalDifference += difference;
-        if (difference > 35) changedPixels += 1;
-      }
-      return totalDifference / pixels > 25 && changedPixels / pixels > 0.35;
-    }
-
-    function scanForVisualCut() {
-      const video = previewPlayers.get(STATIONS[index].id)?.video;
-      if (!panelOpen || !video || scanFrameBlocked || document.hidden ||
-          video.paused || video.readyState < 2 || !el.offair.classList.contains("hidden")) return null;
-      // A transient readback failure must not disable AUTO for the entire channel.
-      if (scanFrameUnavailable && Date.now() - scanLastFrameAttempt < 3000) return null;
-      scanLastFrameAttempt = Date.now();
-      try {
-        if (!scanCanvas) {
-          scanCanvas = document.createElement("canvas");
-          scanCanvas.width = 24;
-          scanCanvas.height = 14;
-          scanContext = scanCanvas.getContext("2d", { willReadFrequently: true });
-          if (!scanContext) throw new Error("Canvas unavailable");
-        }
-        scanContext.drawImage(video, 0, 0, 24, 14);
-        const current = scanContext.getImageData(0, 0, 24, 14).data;
-        const cut = scanPreviousFrame && scanFrameIsCut(scanPreviousFrame, current);
-        scanPreviousFrame = new Uint8Array(current);
-        scanFrameSeen = true;
-        scanFrameUnavailable = false;
-        return !!cut;
-      } catch (error) {
-        // A browser security boundary is final for this channel; never retry around it.
-        if (error?.name === "SecurityError") scanFrameBlocked = true;
-        scanFrameUnavailable = true;
-        scanPreviousFrame = null;
-        scanCanvas = null;
-        scanContext = null;
-        return null;
-      }
+      scanDeadline = Date.now() + (scanType === "auto" ? scanAutoIntervalMs : scanIntervalSeconds() * 1000);
     }
 
     function scanIntervalSeconds() {
       return scanType === "30" ? 30 : scanType === "60" ? 60 : scanCustomSeconds;
     }
 
+    function scanClock(ms, roundUp = true) {
+      const seconds = Math.max(0, (roundUp ? Math.ceil : Math.floor)(ms / 1000));
+      return String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
+    }
+
+    function markAutoInterval() {
+      if (!scanMode || scanType !== "auto" || !panelOpen) return;
+      if (scanAutoPhase !== "marking") {
+        scanAutoStartedAt = performance.now();
+        scanAutoPhase = "marking";
+        scanAutoMessage = "";
+      } else {
+        const measured = Math.round(performance.now() - scanAutoStartedAt);
+        scanAutoStartedAt = 0;
+        if (measured < 2000) {
+          scanAutoPhase = "ready";
+          scanAutoMessage = "2S MIN";
+        } else {
+          scanAutoIntervalMs = measured;
+          scanAutoPhase = "running";
+          scanDeadline = Date.now() + scanAutoIntervalMs;
+        }
+      }
+      updateScanControls();
+    }
+
     function updateScanControls() {
       el.scanBtn.disabled = !panelOpen;
-      el.scanBtn.title = panelOpen ? "Switch after two distinct strong visual changes" : "Open the channel drawer to use AUTO";
+      el.scanBtn.title = panelOpen ? "Measure an interval with START and STOP, then scan automatically" : "Open the channel drawer to use AUTO";
+      el.scanMarkBtn.disabled = !panelOpen || !scanMode || scanType !== "auto";
+      el.scanMarkBtn.textContent = scanAutoPhase === "marking" ? "STOP" : "START";
       for (const [type, button] of [["auto", el.scanBtn], ["30", el.scan30Btn], ["60", el.scan60Btn]]) {
         const active = scanMode && scanType === type;
         button.classList.toggle("active", active);
@@ -647,33 +611,20 @@
         el.scanStatus.textContent = "";
         el.autoStatus.textContent = "";
       } else if (scanType === "auto") {
-        const noFrame = scanFrameUnavailable || (!scanFrameSeen && Date.now() - scanStartedAt > 5000);
         el.scanStatus.textContent = "";
-        el.autoStatus.textContent = noFrame ? "NO FRAME" : "[" + Math.min(scanCutCount, 1) + "]";
+        el.autoStatus.textContent = scanAutoPhase === "marking" ? scanClock(performance.now() - scanAutoStartedAt, false) :
+          scanAutoPhase === "running" ? scanClock(scanDeadline - Date.now()) : scanAutoMessage || "READY";
       } else {
-        const remaining = Math.max(0, Math.ceil((scanDeadline - Date.now()) / 1000));
         el.autoStatus.textContent = "";
-        el.scanStatus.textContent = String(Math.floor(remaining / 60)).padStart(2, "0") + ":" + String(remaining % 60).padStart(2, "0");
+        el.scanStatus.textContent = scanClock(scanDeadline - Date.now());
       }
     }
 
     function scanTick() {
       if (!scanMode || !on || scanSwitching) return;
-      if (scanType === "auto" && el.offair.classList.contains("hidden")) {
-        const cut = scanForVisualCut();
-        if (cut === true && scanCutArmed) {
-          scanCutCount += 1;
-          scanCutArmed = false;
-          scanStableFrames = 0;
-        } else if (cut === false && !scanCutArmed) {
-          scanStableFrames += 1;
-          if (scanStableFrames >= 2) scanCutArmed = true;
-        }
-        updateScanControls();
-        if (scanCutCount < 2) return;
-      } else if (Date.now() < scanDeadline) {
-        return;
-      }
+      updateScanControls();
+      if (scanType === "auto" && scanAutoPhase !== "running") return;
+      if (Date.now() < scanDeadline) return;
       scanSwitching = true;
       queueGo(index + 1).finally(() => { scanSwitching = false; });
     }
@@ -686,11 +637,17 @@
         scanTimer = null;
       }
       if (!enabled) {
-        scanCanvas = null;
-        scanContext = null;
-        scanPreviousFrame = null;
+        scanAutoPhase = "ready";
+        scanAutoStartedAt = 0;
+        scanAutoMessage = "";
         updateScanControls();
         return;
+      }
+      if (scanType === "auto") {
+        scanAutoPhase = "ready";
+        scanAutoStartedAt = 0;
+        scanAutoIntervalMs = 0;
+        scanAutoMessage = "";
       }
       resetScanWindow();
       updateScanControls();
@@ -790,6 +747,7 @@
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
     el.scanBtn.addEventListener("click", () => chooseScanMode("auto"));
+    el.scanMarkBtn.addEventListener("click", markAutoInterval);
     el.scan30Btn.addEventListener("click", () => chooseScanMode("30"));
     el.scan60Btn.addEventListener("click", () => chooseScanMode("60"));
     function chooseCustomScan() {
