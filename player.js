@@ -135,6 +135,7 @@
       tickerTrack: document.getElementById("tickerTrack"),
       supportOverlay: document.getElementById("supportOverlay"),
       supportClose: document.getElementById("supportClose"),
+      supportCloseInline: document.getElementById("supportCloseInline"),
       supportCopy: document.getElementById("supportCopy"),
       supportStatus: document.getElementById("supportStatus"),
       clock: document.getElementById("clock")
@@ -749,7 +750,7 @@
     function openSupport(trigger) {
       supportReturnFocus = trigger;
       el.supportOverlay.hidden = false;
-      el.supportStatus.textContent = "The live stream continues behind this panel.";
+      el.supportStatus.textContent = "";
       el.supportClose.focus();
     }
 
@@ -793,6 +794,7 @@
       openSupport(trigger);
     });
     el.supportClose.addEventListener("click", closeSupport);
+    el.supportCloseInline.addEventListener("click", closeSupport);
     el.supportCopy.addEventListener("click", copySupportAddress);
     el.supportOverlay.addEventListener("pointerdown", (e) => { if (e.target === el.supportOverlay) closeSupport(); });
     el.scanBtn.addEventListener("click", () => chooseScanMode("auto"));
