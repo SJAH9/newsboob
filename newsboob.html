@@ -467,7 +467,8 @@
       color: var(--cyan);
     }
     .keys button:active, .bezel-btn:active { background: #0c1210; }
-    .drawer-support { align-self: stretch; width: 100%; margin-top: auto; padding: 7px 8px; border-top: 1px solid var(--line); color: var(--dim); font: 500 9px/1 var(--font); letter-spacing: .14em; text-align: center; text-decoration: none; text-transform: uppercase; }
+    .drawer-links { align-self: stretch; width: 100%; margin-top: auto; }
+    .drawer-support { display: block; width: 100%; padding: 7px 8px; border-top: 1px solid var(--line); color: var(--dim); font: 500 9px/1 var(--font); letter-spacing: .14em; text-align: center; text-decoration: none; text-transform: uppercase; }
     .drawer-support:hover { color: var(--cyan); }
 
     .tv {
@@ -758,7 +759,10 @@
             <button type="button" id="nextBtn">Next</button>
             <div class="auto-controls"><button class="bezel-btn auto-mark" id="scanMarkBtn" type="button" disabled>START</button><span class="auto-status" id="autoStatus" aria-live="polite"></span></div>
           </div>
-          <a class="drawer-support" href="donate.html">Support NEWSBOOB</a>
+          <div class="drawer-links">
+            <a class="drawer-support" href="donate.html">Support NEWSBOOB</a>
+            <a class="drawer-support" href="https://github.com/SJAH9/newsboob" target="_blank" rel="noopener noreferrer">NEWSBOOB is open source</a>
+          </div>
         </aside>
 
         <section class="tv">
