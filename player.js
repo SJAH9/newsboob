@@ -133,6 +133,10 @@
       titleDate: document.getElementById("titleDate"),
       titleChan: document.getElementById("titleChan"),
       tickerTrack: document.getElementById("tickerTrack"),
+      supportOverlay: document.getElementById("supportOverlay"),
+      supportClose: document.getElementById("supportClose"),
+      supportCopy: document.getElementById("supportCopy"),
+      supportStatus: document.getElementById("supportStatus"),
       clock: document.getElementById("clock")
     };
 
@@ -152,6 +156,7 @@
     let scanCustomSeconds = 45;
     let scanDeadline = 0;
     let scanSwitching = false;
+    let supportReturnFocus = null;
     let scanAutoPhase = "ready";
     let scanAutoStartedAt = 0;
     let scanAutoIntervalMs = 0;
@@ -179,12 +184,13 @@
       el.tickerTrack.appendChild(tickerButton);
     });
     for (const item of [
-      { label: "Support NEWSBOOB", href: "donate.html" },
-      { label: "NEWSBOOB is open source", href: "https://github.com/SJAH9/newsboob", external: true }
+      { label: "Support NEWSBOOB", href: "donate.html", support: true },
+      { label: "Open Source", href: "https://github.com/SJAH9/newsboob", external: true }
     ]) {
       const tickerLink = document.createElement("a");
       tickerLink.textContent = item.label;
       tickerLink.href = item.href;
+      if (item.support) tickerLink.classList.add("support-trigger");
       if (item.external) {
         tickerLink.target = "_blank";
         tickerLink.rel = "noopener noreferrer";
@@ -740,6 +746,28 @@
       }
     }
 
+    function openSupport(trigger) {
+      supportReturnFocus = trigger;
+      el.supportOverlay.hidden = false;
+      el.supportStatus.textContent = "The live stream continues behind this panel.";
+      el.supportClose.focus();
+    }
+
+    function closeSupport() {
+      el.supportOverlay.hidden = true;
+      supportReturnFocus?.focus();
+      supportReturnFocus = null;
+    }
+
+    async function copySupportAddress() {
+      try {
+        await navigator.clipboard.writeText("1LoNg5YrKJ6xM5oKvcCP7nZ1RAuj9wj4Hr");
+        el.supportStatus.textContent = "Bitcoin address copied.";
+      } catch (_) {
+        el.supportStatus.textContent = "Select the address above to copy it.";
+      }
+    }
+
     function angleIndex(evt) {
       const r = el.dial.getBoundingClientRect();
       const pt = evt.clientX != null ? evt : (evt.touches && evt.touches[0]);
@@ -758,6 +786,15 @@
     el.muteBtn.addEventListener("click", () => { muted = !muted; applyVolume(); });
     el.panelBtn.addEventListener("click", () => setPanel(!panelOpen));
     el.reloadBtn.addEventListener("click", () => reloadStream());
+    document.addEventListener("click", (e) => {
+      const trigger = e.target.closest(".support-trigger");
+      if (!trigger) return;
+      e.preventDefault();
+      openSupport(trigger);
+    });
+    el.supportClose.addEventListener("click", closeSupport);
+    el.supportCopy.addEventListener("click", copySupportAddress);
+    el.supportOverlay.addEventListener("pointerdown", (e) => { if (e.target === el.supportOverlay) closeSupport(); });
     el.scanBtn.addEventListener("click", () => chooseScanMode("auto"));
     el.scanMarkBtn.addEventListener("click", markAutoInterval);
     el.scan30Btn.addEventListener("click", () => chooseScanMode("30"));
@@ -811,6 +848,10 @@
 
     window.addEventListener("keydown", (e) => {
       if (e.target.matches("input, textarea")) return;
+      if (!el.supportOverlay.hidden) {
+        if (e.key === "Escape") closeSupport();
+        return;
+      }
       if (/^[1-9]$/.test(e.key) && Number(e.key) <= STATIONS.length) go(Number(e.key) - 1);
       if (e.key === "0" && STATIONS.length >= 10) go(9);
       if (e.key === "ArrowRight") { e.preventDefault(); queueGo(index + 1); }
