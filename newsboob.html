@@ -238,7 +238,8 @@
       color: var(--cyan);
       background: rgba(61, 255, 210, .1);
     }
-    .scan-btn:disabled, .auto-mark:disabled { opacity: .35; cursor: not-allowed; }
+    .scan-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .auto-mark:disabled { display: none; }
     .auto-controls { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
     .auto-controls .auto-mark { flex: 1 1 auto; }
     .auto-status { min-width: 60px; color: var(--cyan); text-align: center; font: 500 9px/1 var(--font); letter-spacing: .04em; }
