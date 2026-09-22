@@ -4,6 +4,8 @@ A standalone, browser-based HLS viewer for live news and host media.
 
 **Live:** [sidhubbard.com/newsboob](https://sidhubbard.com/newsboob/)
 
+**Standalone:** [sjah9.github.io/newsboob](https://sjah9.github.io/newsboob/)
+
 NewsBoob uses one video element for direct HLS playback. It does not require an account, a backend application, or an embedded third-party player. The HLS engine is stored in the repository and loaded locally by the page.
 
 ## Repository files
