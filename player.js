@@ -148,7 +148,7 @@
     let dragIndex = index;
     let scanTimer = null;
     let scanMode = false;
-    let scanType = "auto";
+    let scanType = "30";
     let scanCustomSeconds = 45;
     let scanDeadline = 0;
     let scanSwitching = false;
@@ -178,11 +178,26 @@
       tickerButton.addEventListener("click", () => go(i));
       el.tickerTrack.appendChild(tickerButton);
     });
+    for (const item of [
+      { label: "Support NEWSBOOB", href: "donate.html" },
+      { label: "NEWSBOOB is open source", href: "https://github.com/SJAH9/newsboob", external: true }
+    ]) {
+      const tickerLink = document.createElement("a");
+      tickerLink.textContent = item.label;
+      tickerLink.href = item.href;
+      if (item.external) {
+        tickerLink.target = "_blank";
+        tickerLink.rel = "noopener noreferrer";
+      }
+      el.tickerTrack.appendChild(tickerLink);
+    }
     const tickerButtons = [...el.tickerTrack.children];
     for (let repeat = 0; repeat < 2; repeat += 1) {
       tickerButtons.forEach((button) => {
         const clone = button.cloneNode(true);
-        clone.addEventListener("click", () => go(Number(clone.dataset.stationIndex)));
+        if (clone.dataset.stationIndex !== undefined) {
+          clone.addEventListener("click", () => go(Number(clone.dataset.stationIndex)));
+        }
         el.tickerTrack.appendChild(clone);
       });
     }
@@ -601,12 +616,12 @@
       el.scanMarkBtn.disabled = !panelOpen || !scanMode || scanType !== "auto";
       el.scanMarkBtn.textContent = scanAutoPhase === "marking" ? "STOP" : "START";
       for (const [type, button] of [["auto", el.scanBtn], ["30", el.scan30Btn], ["60", el.scan60Btn]]) {
-        const active = scanMode && scanType === type;
+        const active = scanType === type;
         button.classList.toggle("active", active);
         button.setAttribute("aria-pressed", String(active));
       }
-      el.scanCustom.classList.toggle("active", scanMode && scanType === "custom");
-      el.scanCustom.setAttribute("aria-label", "Custom scan interval in seconds" + (scanMode && scanType === "custom" ? ", active" : ""));
+      el.scanCustom.classList.toggle("active", scanType === "custom");
+      el.scanCustom.setAttribute("aria-label", "Custom scan interval in seconds" + (scanType === "custom" ? ", selected" : ""));
       if (!scanMode) {
         el.scanStatus.textContent = "";
         el.autoStatus.textContent = "";
@@ -656,12 +671,9 @@
     }
 
     function chooseScanMode(type) {
-      if (scanMode && scanType === type) {
-        setScanMode(false);
-      } else {
-        scanType = type;
-        setScanMode(true);
-      }
+      scanType = type;
+      if (scanMode) resetScanWindow();
+      updateScanControls();
     }
 
     function setPanel(open) {
@@ -755,7 +767,8 @@
       if (!Number.isInteger(seconds) || seconds < 5 || seconds > 3600) return;
       scanCustomSeconds = seconds;
       scanType = "custom";
-      setScanMode(true);
+      if (scanMode) resetScanWindow();
+      updateScanControls();
     }
     el.scanCustom.addEventListener("change", chooseCustomScan);
     el.scanCustom.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); chooseCustomScan(); el.scanCustom.blur(); } });

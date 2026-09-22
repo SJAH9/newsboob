@@ -239,8 +239,7 @@
       background: rgba(61, 255, 210, .1);
     }
     .scan-btn:disabled { opacity: .35; cursor: not-allowed; }
-    .auto-mark:disabled { display: none; }
-    .auto-controls { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
+    #scanBtn, .auto-controls { display: none; }
     .auto-controls .auto-mark { flex: 1 1 auto; }
     .auto-status { min-width: 60px; color: var(--cyan); text-align: center; font: 500 9px/1 var(--font); letter-spacing: .04em; }
     .scan-controls { display: flex; align-items: center; gap: 4px; }
@@ -667,7 +666,7 @@
     }
     .ticker-track { display: inline-flex; align-items: center; width: max-content; animation: ticker-scroll 42s linear infinite; }
     .ticker:hover .ticker-track, .ticker:focus-within .ticker-track { animation-play-state: paused; }
-    .ticker button {
+    .ticker button, .ticker a {
       appearance: none;
       border: 0;
       border-right: 1px solid var(--line);
@@ -678,8 +677,9 @@
       text-transform: uppercase;
       padding: 7px 10px;
       cursor: pointer;
+      text-decoration: none;
     }
-    .ticker button:hover, .ticker button:focus-visible { color: var(--cyan); background: rgba(61,255,210,.08); }
+    .ticker button:hover, .ticker button:focus-visible, .ticker a:hover, .ticker a:focus-visible { color: var(--cyan); background: rgba(61,255,210,.08); }
     .ticker button.active { color: var(--mag); background: rgba(255,61,154,.1); }
     .bezel-controls { flex-shrink: 0; }
     @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-35%); } }

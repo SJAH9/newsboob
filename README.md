@@ -24,7 +24,7 @@ The player includes:
 - previous, next, scan, reload, mute, volume, and framed-fullscreen controls;
 - a continuously moving, clickable channel ticker with active-channel highlighting;
 - a live viewer-local date and 24-hour time followed by the channel source's local weekday and 24-hour time;
-- keyboard navigation and four Scan choices: AUTO, :30, :60, or a custom number of seconds; and
+- keyboard navigation and three scan intervals: :30, :60, or a custom number of seconds; and
 - responsive sizing that keeps the main player visible on short and narrow displays.
 
 The sidhubbard.com presentation adds the Sid J.A. Hubbard site navigation, theme controls, an About page, and site-footer attribution. Those website elements remain outside the portable standalone files.
@@ -70,7 +70,7 @@ Select a channel from the channel list, live-monitor grid, or moving ticker. You
 
 The **Full** control takes the complete NewsBoob set fullscreen, retaining its player bezel, source status, controls, and channel ticker. It changes to **Exit** while fullscreen is active.
 
-**AUTO** sits beside the timed interval controls in the header and is available only while the channel drawer is open. Select AUTO, then click START below the channel controls at the beginning of a user-chosen interval and STOP at its end. The measured interval becomes the dwell time for each channel; the first automatic switch happens one full interval after STOP. Click START again to measure a new interval, click AUTO again to stop, or close the drawer to stop. Intervals shorter than two seconds are rejected. AUTO never inspects video or audio, and it does not change the main stream-loading path or CORS settings. **:30** and **:60** retain a visible countdown and switch after 30 or 60 seconds of playback. Enter a whole number from 5 to 3600 in the custom field to set an interval in seconds; it also has a countdown.
+Choose **:30**, **:60**, or enter a whole number from 5 to 3600 in the custom field to select the scan interval. Press **S** to start the visible countdown in the upper-right controls; each completed interval advances to the next channel. Press **S** again to stop scanning.
 
 ## Host NewsBoob on your website
 
