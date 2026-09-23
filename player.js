@@ -119,6 +119,7 @@
       nextBtn: document.getElementById("nextBtn"),
       panelBtn: document.getElementById("panelBtn"),
       reloadBtn: document.getElementById("reloadBtn"),
+      scanToggleBtn: document.getElementById("scanToggleBtn"),
       scanBtn: document.getElementById("scanBtn"),
       scanMarkBtn: document.getElementById("scanMarkBtn"),
       scan30Btn: document.getElementById("scan30Btn"),
@@ -618,6 +619,9 @@
     }
 
     function updateScanControls() {
+      el.scanToggleBtn.classList.toggle("active", scanMode);
+      el.scanToggleBtn.setAttribute("aria-pressed", String(scanMode));
+      el.scanToggleBtn.title = scanMode ? "Stop scan" : "Start scan using the selected interval";
       el.scanBtn.disabled = !panelOpen;
       el.scanBtn.title = panelOpen ? "Measure an interval with START and STOP, then scan automatically" : "Open the channel drawer to use AUTO";
       el.scanMarkBtn.disabled = !panelOpen || !scanMode || scanType !== "auto";
@@ -797,6 +801,7 @@
     el.supportCloseInline.addEventListener("click", closeSupport);
     el.supportCopy.addEventListener("click", copySupportAddress);
     el.supportOverlay.addEventListener("pointerdown", (e) => { if (e.target === el.supportOverlay) closeSupport(); });
+    el.scanToggleBtn.addEventListener("click", () => setScanMode(!scanMode));
     el.scanBtn.addEventListener("click", () => chooseScanMode("auto"));
     el.scanMarkBtn.addEventListener("click", markAutoInterval);
     el.scan30Btn.addEventListener("click", () => chooseScanMode("30"));

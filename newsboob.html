@@ -744,7 +744,7 @@
     <div class="set">
       <header class="plate">
         <div class="wordmark">NEWS<i>BOOB</i><span class="datetime" id="titleDate"></span><span class="chan" id="titleChan"></span></div>
-        <div class="model"><span>International News</span><div class="scan-controls" aria-label="Scan modes"><button class="bezel-btn" id="scanPrevBtn" type="button" aria-label="Previous channel">&lt;</button><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false" title="Measure an interval, then scan automatically">AUTO</button><button class="bezel-btn scan-btn" id="scan30Btn" type="button" aria-pressed="false" title="Switch every 30 seconds">:30</button><button class="bezel-btn scan-btn" id="scan60Btn" type="button" aria-pressed="false" title="Switch every 60 seconds">:60</button><input class="scan-custom" id="scanCustom" type="number" min="5" max="3600" step="1" inputmode="numeric" placeholder="SEC" aria-label="Custom scan interval in seconds" title="Enter 5–3600 seconds, then press Enter" /><span class="scan-status" id="scanStatus" aria-hidden="true"></span><button class="bezel-btn" id="scanNextBtn" type="button" aria-label="Next channel">&gt;</button></div></div>
+        <div class="model"><span>International News</span><div class="scan-controls" aria-label="Timed scan modes"><button class="bezel-btn scan-btn" id="scanToggleBtn" type="button" aria-pressed="false" title="Start scan using the selected interval">SCAN</button><button class="bezel-btn" id="scanPrevBtn" type="button" aria-label="Previous channel">&lt;</button><button class="bezel-btn scan-btn" id="scan30Btn" type="button" aria-pressed="false" title="Switch every 30 seconds">:30</button><button class="bezel-btn scan-btn" id="scan60Btn" type="button" aria-pressed="false" title="Switch every 60 seconds">:60</button><input class="scan-custom" id="scanCustom" type="number" min="5" max="3600" step="1" inputmode="numeric" placeholder="SEC" aria-label="Custom scan interval in seconds" title="Enter 5–3600 seconds, then press Enter" /><span class="scan-status" id="scanStatus" aria-hidden="true"></span><button class="bezel-btn" id="scanNextBtn" type="button" aria-label="Next channel">&gt;</button></div></div>
       </header>
 
       <div class="body" id="layout">
@@ -771,7 +771,7 @@
           <div class="keys">
             <button type="button" id="prevBtn">Prev</button>
             <button type="button" id="nextBtn">Next</button>
-            <div class="auto-controls"><button class="bezel-btn auto-mark" id="scanMarkBtn" type="button" disabled>START</button><span class="auto-status" id="autoStatus" aria-live="polite"></span></div>
+            <div class="auto-controls"><button class="bezel-btn scan-btn" id="scanBtn" type="button" aria-pressed="false" title="Measure an interval, then scan automatically">AUTO</button><button class="bezel-btn auto-mark" id="scanMarkBtn" type="button" disabled>START</button><span class="auto-status" id="autoStatus" aria-live="polite"></span></div>
           </div>
           <div class="drawer-links">
             <a class="drawer-support support-trigger" href="donate.html">Support NEWSBOOB</a>
@@ -841,6 +841,6 @@
       </div>
     </div>
   </div>
-  <script src="player.js?v=20260921-support-close"></script>
+  <script src="player.js?v=20260923-scan-toggle"></script>
 </body>
 </html>
