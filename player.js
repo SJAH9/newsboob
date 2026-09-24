@@ -916,4 +916,4 @@
 
     setPanel(panelOpen);
     setPointer(index);
-    setStatus("off", "Power on, then turn the dial.");
+    setStatus("off", "Press START, then choose a channel.");
