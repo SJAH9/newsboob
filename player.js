@@ -94,6 +94,8 @@
 
     STATIONS.push({id: "i24en", label: "i24NEWS English", name: "i24NEWS English", nation: "Israel", timeZone: "Asia/Jerusalem", tickerOnly: true, hls: ["https://hlspackager.akamaized.net/live/DB/i24_ENGLISH/HLS/i24_ENGLISH.m3u8"], site: "https://video.i24news.tv/"});
 
+    const playbackToggle=document.createElement('button');playbackToggle.type='button';playbackToggle.className='bezel-btn';playbackToggle.id='playbackToggle';playbackToggle.textContent='[Start]';playbackToggle.setAttribute('aria-label','Start selected channel');document.getElementById('vol').closest('label').after(playbackToggle);playbackToggle.addEventListener('click',()=>on?powerOff():go(index));
+
     function face(station) {
       return station.nation || station.label;
     }
@@ -380,6 +382,7 @@
     new ResizeObserver(fitChannelRail).observe(el.layout);
 
     function setStatus(src, detail) {
+      playbackToggle.textContent=on?'[Stop]':'[Start]';playbackToggle.setAttribute('aria-label',on?'Stop playback':'Start selected channel');
       const s = STATIONS[index];
       el.call.textContent = on ? face(s) : "STANDBY";
       el.live.classList.toggle("off", !on);
@@ -587,10 +590,13 @@
 
     function powerOn() {
       on = true;
+      playbackToggle.textContent='[Stop]';playbackToggle.setAttribute('aria-label','Stop playback');
       el.veil.classList.add("hidden");
       el.pwrLed.className = "dot on";
       if (panelOpen) syncPreviews();
     }
+
+    function powerOff(){if(!on)return;on=false;locked=-1;token+=1;setScanMode(false);stopHls();stopYt();hideOffAir();[...previewPlayers.keys()].forEach(killPreview);el.previews.classList.remove('on');el.veil.classList.remove('hidden');setStatus('off','Press START, then choose a channel.');el.pwrLed.className='dot';}
 
     function resetScanWindow() {
       scanDeadline = Date.now() + (scanType === "auto" ? scanAutoIntervalMs : scanIntervalSeconds() * 1000);
