@@ -373,6 +373,7 @@
         previewPlayers.get(s.id).tile.classList.toggle("active", i === index);
       });
       el.previews.classList.toggle("on", previewPlayers.size > 0);
+      el.previews.style.setProperty('--channel-count', String(Math.max(1, previewPlayers.size)));
     }
 
     function setStatus(src, detail) {

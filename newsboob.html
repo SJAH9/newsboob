@@ -766,6 +766,12 @@
 .readout,.keys,.auto-controls,.drawer-support{max-width:100%!important}
 @media(max-width:600px){.body:not(.solo){grid-template-columns:96px minmax(0,1fr)!important}}
 </style>
+<style id="newsboob-fit-thumbnails">
+.previews{grid-auto-rows:unset!important;grid-template-rows:repeat(var(--channel-count,12),minmax(0,1fr))!important;overflow:hidden!important;gap:2px!important;height:100%!important}
+.preview{min-height:0!important;height:100%!important;gap:1px!important}
+.preview video{flex:1 1 0!important;min-height:0!important;height:0!important;aspect-ratio:auto!important;object-fit:cover!important}
+.preview .tag{flex:0 0 auto!important}
+</style>
 </head>
 <body class="newsboob-page">
   <div class="carto" aria-hidden="true"></div>
