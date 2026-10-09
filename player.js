@@ -542,6 +542,7 @@
     }
 
     async function go(i) {
+      el.veil.classList.add('hidden');el.power.textContent='[Start]';
       i = (i + STATIONS.length) % STATIONS.length;
       if (scanMode) resetScanWindow();
       index = i;
@@ -939,4 +940,4 @@
     setPanel(panelOpen);
     setPointer(index);
     setStatus("off", "Press START, then choose a channel.");
-    if(new URLSearchParams(location.search).get('launch')==='1'){const station=Number(new URLSearchParams(location.search).get('station'));go(Number.isInteger(station)?station:index);requestNewsFullscreen().then(ok=>{if(!ok){el.power.textContent='[Enter fullscreen]';el.veil.classList.remove('hidden');}});}
+    if(new URLSearchParams(location.search).get('launch')==='1'){const station=Number(new URLSearchParams(location.search).get('station'));go(Number.isInteger(station)?station:index);requestNewsFullscreen().then(ok=>{if(!ok){el.fsBtn.textContent='[Fullscreen]';el.fsBtn.title='Click to allow fullscreen in this window';}});}
