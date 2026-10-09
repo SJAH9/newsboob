@@ -737,6 +737,18 @@
       .set { --dial: clamp(110px, 34vmin, 180px); }
     }
   </style>
+<style id="compact-newsboob-bezel">
+/* Compact bezel: reclaim spacing without reducing type or touch targets. */
+.desk{padding:2px!important}
+.set,.set:fullscreen,.set:-webkit-full-screen{padding:4px!important;gap:4px!important}
+.plate{gap:6px!important;padding-bottom:3px!important}
+.body{gap:4px!important}
+.tv{padding:2px!important}
+.under{gap:4px!important;padding:2px 0 0!important}
+.bezel-controls{gap:4px!important}
+.news-intro{padding:4px 8px!important;gap:8px!important}
+@media(pointer:coarse){.bezel-btn,.ticker button,.ticker a{min-height:36px}.under{row-gap:2px!important}}
+</style>
 </head>
 <body class="newsboob-page">
   <div class="carto" aria-hidden="true"></div>
