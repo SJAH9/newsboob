@@ -745,9 +745,10 @@
 .body{gap:4px!important}
 .tv{padding:2px!important}
 .under{gap:4px!important;padding:2px 0 0!important}
-.bezel-controls{gap:4px!important}
+.bezel-controls{gap:4px!important;flex:0 0 auto!important;max-width:none!important}
 .news-intro{padding:4px 8px!important;gap:8px!important}
 @media(pointer:coarse){.bezel-btn,.ticker button,.ticker a{min-height:36px}.under{row-gap:2px!important}}
+@media(max-width:700px){.bezel-controls{flex:1 1 auto!important;max-width:100%!important}.ticker{flex-basis:100%!important}}
 </style>
 </head>
 <body class="newsboob-page">
