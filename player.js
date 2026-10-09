@@ -374,7 +374,10 @@
       });
       el.previews.classList.toggle("on", previewPlayers.size > 0);
       el.previews.style.setProperty('--channel-count', String(Math.max(1, previewPlayers.size)));
+      fitChannelRail();
     }
+    function fitChannelRail(){const n=Math.max(1,previewPlayers.size),height=el.layout.clientHeight;const width=Math.min(132,Math.max(48,(height/n-16)*16/9));el.layout.style.setProperty('--thumbnail-rail-width',width+'px');}
+    new ResizeObserver(fitChannelRail).observe(el.layout);
 
     function setStatus(src, detail) {
       const s = STATIONS[index];

@@ -772,6 +772,12 @@
 .preview video{flex:1 1 0!important;min-height:0!important;height:0!important;aspect-ratio:auto!important;object-fit:cover!important}
 .preview .tag{flex:0 0 auto!important}
 </style>
+<style id="newsboob-fullscreen-fit">
+.body:not(.solo){grid-template-columns:var(--thumbnail-rail-width,128px) minmax(0,1fr)!important;overflow:hidden!important}
+.set:fullscreen,.set:-webkit-full-screen{height:100dvh!important;max-height:100dvh!important;min-height:0!important}
+.tuner,.previews{overflow:hidden!important}
+.previews{overflow-y:hidden!important;overflow-x:hidden!important}
+</style>
 </head>
 <body class="newsboob-page">
   <div class="carto" aria-hidden="true"></div>
