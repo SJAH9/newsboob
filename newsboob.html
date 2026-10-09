@@ -750,6 +750,13 @@
 @media(pointer:coarse){.bezel-btn,.ticker button,.ticker a{min-height:36px}.under{row-gap:2px!important}}
 @media(max-width:700px){.bezel-controls{flex:1 1 auto!important;max-width:100%!important}.ticker{flex-basis:100%!important}}
 </style>
+<style id="compact-newsboob-drawer">
+.tuner{gap:4px!important;align-items:stretch!important}
+.previews{max-width:none!important;flex:0 1 auto!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:none!important;grid-auto-rows:max-content!important;align-content:start!important;gap:4px!important;overflow-y:auto!important}
+.preview{height:auto!important;gap:2px!important;min-height:44px!important}
+.preview .tag{line-height:1.3!important}
+@media(max-width:860px){.previews{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))!important}}
+</style>
 </head>
 <body class="newsboob-page">
   <div class="carto" aria-hidden="true"></div>
